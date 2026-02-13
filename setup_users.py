@@ -24,16 +24,19 @@ def create_users():
         email = user_data.pop('email')
         password = user_data.pop('password')
         
-        if not User.objects.filter(username=username).exists():
-            User.objects.create_user(username=username, email=email, password=password, **user_data)
-            print(f"✅ Created user: {username}")
-        else:
-            print(f"⏭️  User already exists: {username}")
+        try:
+            if not User.objects.filter(username=username).exists():
+                User.objects.create_user(username=username, email=email, password=password, **user_data)
+                print(f"✅ Usuario creado: {username}")
+            else:
+                print(f"User ya existe: {username}")
+        except Exception as e:
+            print(f"Error creating {username}: {e}")
 
 if __name__ == '__main__':
     try:
         create_users()
-        print("✅ User setup complete")
+        print("✅ Setup completado")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         sys.exit(1)

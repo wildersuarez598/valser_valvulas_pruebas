@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py create_default_users && gunicorn config.wsgi
+web: python manage.py migrate && python setup_users.py && gunicorn config.wsgi
