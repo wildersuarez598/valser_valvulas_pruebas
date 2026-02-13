@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database - usar PostgreSQL en producción si existe
 DATABASE_URL = environ.get('DATABASE_URL')
 if DATABASE_URL and DATABASE_URL.strip():
-    import dj_database_url
+    import dj_database_url  # type: ignore
     DATABASES = {
         'default': dj_database_url.config(default=DATABASE_URL)
     }
