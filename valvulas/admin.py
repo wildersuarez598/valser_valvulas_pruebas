@@ -1,5 +1,4 @@
 from django.contrib import admin
-from config.admin import admin_site
 from .models import Valvula, EspecificacionTecnica
 
 
@@ -64,5 +63,5 @@ class EspecificacionTecnicaAdmin(admin.ModelAdmin):
     )
 
 
-admin_site.register(Valvula, ValvulaAdmin)
-admin_site.register(EspecificacionTecnica, EspecificacionTecnicaAdmin)
+admin.site.register(Valvula, ValvulaAdmin)
+admin.site.register(EspecificacionTecnica, EspecificacionTecnicaAdmin)

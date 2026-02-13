@@ -1,5 +1,4 @@
 from django.contrib import admin
-from config.admin import admin_site
 from .models import Empresa, Contacto
 
 
@@ -56,5 +55,5 @@ class ContactoAdmin(admin.ModelAdmin):
     )
 
 
-admin_site.register(Empresa, EmpresaAdmin)
-admin_site.register(Contacto, ContactoAdmin)
+admin.site.register(Empresa, EmpresaAdmin)
+admin.site.register(Contacto, ContactoAdmin)

@@ -1,5 +1,4 @@
 from django.contrib import admin
-from config.admin import admin_site
 from .models import Servicio, Certificado, AlertaServicio
 
 
@@ -92,6 +91,6 @@ class AlertaServicioAdmin(admin.ModelAdmin):
         return request.user.is_superuser
 
 
-admin_site.register(Servicio, ServicioAdmin)
-admin_site.register(Certificado, CertificadoAdmin)
-admin_site.register(AlertaServicio, AlertaServicioAdmin)
+admin.site.register(Servicio, ServicioAdmin)
+admin.site.register(Certificado, CertificadoAdmin)
+admin.site.register(AlertaServicio, AlertaServicioAdmin)

@@ -1,5 +1,4 @@
 from django.contrib import admin
-from config.admin import admin_site
 from .models import PerfilUsuario, LogActividad
 
 
@@ -45,5 +44,5 @@ class LogActividadAdmin(admin.ModelAdmin):
         return False
 
 
-admin_site.register(PerfilUsuario, PerfilUsuarioAdmin)
-admin_site.register(LogActividad, LogActividadAdmin)
+admin.site.register(PerfilUsuario, PerfilUsuarioAdmin)
+admin.site.register(LogActividad, LogActividadAdmin)

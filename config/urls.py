@@ -19,11 +19,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from usuarios.views import login_view
-from config.admin import admin_site
 
 urlpatterns = [
     # Admin
-    path('admin/', admin_site.urls),    
+    path('admin/', admin.site.urls),    
     # Autenticación y users
     path('auth/', include('usuarios.urls')),
     # Servicios y certificados
