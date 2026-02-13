@@ -151,12 +151,18 @@ LOGIN_REDIRECT_URL = 'usuarios:dashboard'
 LOGOUT_REDIRECT_URL = 'usuarios:login'
 
 # CSRF Configuration
-CSRF_TRUSTED_ORIGINS = environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000').split(',')
+_csrf_origins = environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000')
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
 
 # Security settings para producción
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Railway maneja SSL en el proxy
-    SESSION_COOKIE_SECURE = False  # Railway usa X-Forwarded-Proto
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    # Development settings
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False

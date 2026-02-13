@@ -82,11 +82,17 @@ def cliente_dashboard(request):
     empresa = perfil.empresa
     valvulas = empresa.valvulas.all() if empresa else []
     
+    # Contar válvulas (maneja QuerySet y lista)
+    try:
+        total_valvulas = valvulas.count()
+    except (TypeError, AttributeError):
+        total_valvulas = len(list(valvulas))
+    
     context = {
         'usuario': request.user,
         'empresa': empresa,
         'valvulas': valvulas,
-        'total_valvulas': valvulas.count() if hasattr(valvulas, 'count') else len(valvulas),
+        'total_valvulas': total_valvulas,
     }
     
     return render(request, 'cliente/dashboard.html', context)
