@@ -32,16 +32,21 @@ def create_default_users(sender, app_config, **kwargs):
     """Create default users after migrations are complete."""
     if app_config and app_config.name == 'usuarios':
         users_data = [
-            {'username': 'admin', 'email': 'admin@valser.com', 'password': 'admin123', 'is_superuser': True, 'is_staff': True},
-            {'username': 'comercial', 'email': 'comercial@valser.com', 'password': 'comercial123', 'is_superuser': False, 'is_staff': True},
-            {'username': 'cliente', 'email': 'cliente@valser.com', 'password': 'cliente123', 'is_superuser': False, 'is_staff': False},
+            {'username': 'admin', 'email': 'admin@valser.com', 'password': 'admin123', 'is_superuser': True, 'is_staff': True, 'rol': 'admin'},
+            {'username': 'comercial', 'email': 'comercial@valser.com', 'password': 'comercial123', 'is_superuser': False, 'is_staff': True, 'rol': 'comercial'},
+            {'username': 'cliente', 'email': 'cliente@valser.com', 'password': 'cliente123', 'is_superuser': False, 'is_staff': False, 'rol': 'cliente'},
         ]
         
         for user_data in users_data:
             username = user_data.pop('username')
             email = user_data.pop('email')
             password = user_data.pop('password')
+            rol = user_data.pop('rol', 'cliente')
             
             if not User.objects.filter(username=username).exists():
-                User.objects.create_user(username=username, email=email, password=password, **user_data)
+                user = User.objects.create_user(username=username, email=email, password=password, **user_data)
+                # Asignar rol al perfil
+                perfil = PerfilUsuario.objects.get_or_create(usuario=user)[0]
+                perfil.rol = rol
+                perfil.save()
 

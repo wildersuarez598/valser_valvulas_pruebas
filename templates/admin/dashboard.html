@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Admin - Valser{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="display-4">Panel de Administración</h1>
+            <p class="lead text-muted">Bienvenido, {{ usuario.get_full_name|default:usuario.username }}</p>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="text-primary text-uppercase mb-1 small">Total Empresas</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_empresas }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success h-100 py-2">
+                <div class="card-body">
+                    <div class="text-success text-uppercase mb-1 small">Total Válvulas</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_valvulas }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-warning h-100 py-2">
+                <div class="card-body">
+                    <div class="text-warning text-uppercase mb-1 small">Total Certificados</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_certificados }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-danger h-100 py-2">
+                <div class="card-body">
+                    <div class="text-danger text-uppercase mb-1 small">Total Usuarios</div>
+                    <div class="h3 mb-0 font-weight-bold">{{ total_usuarios }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Opciones de Administración -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Opciones de Administración</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="/admin/" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cog"></i> Acceder al panel de administración Django
+                        </a>
+                        <a href="{% url 'usuarios:cambiar_zona_horaria' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-globe"></i> Cambiar zona horaria
+                        </a>
+                        <a href="{% url 'usuarios:logout' %}" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 4px solid #1e40af !important;
+}
+.border-left-success {
+    border-left: 4px solid #16a34a !important;
+}
+.border-left-warning {
+    border-left: 4px solid #ea580c !important;
+}
+.border-left-danger {
+    border-left: 4px solid #dc2626 !important;
+}
+.text-primary {
+    color: #1e40af !important;
+}
+.text-success {
+    color: #16a34a !important;
+}
+.text-warning {
+    color: #ea580c !important;
+}
+.text-danger {
+    color: #dc2626 !important;
+}
+</style>
+{% endblock %}
