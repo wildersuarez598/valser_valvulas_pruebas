@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Certificados - Valser{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5">{{ titulo }}</h1>
+                    <p class="lead text-muted">{{ descripcion }}</p>
+                </div>
+                <a href="{% url 'upload_certificado' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> Subir Nuevo Certificado
+                </a>
+            </div>
+
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Contenido -->
+            {% if certificados %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead style="background-color: #1e40af; color: white;">
+                            <tr>
+                                <th>Número de Certificado</th>
+                                <th>Tipo</th>
+                                <th>Fecha de Emisión</th>
+                                <th>Resultado</th>
+                                <th>Laboratorio</th>
+                                <th>Extraído</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for certificado in certificados %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ certificado.numero_certificado }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background-color: #1e40af;">
+                                            {{ certificado.get_tipo_certificado_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ certificado.fecha_emision|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if certificado.resultado == "APROBADO" or certificado.resultado == "PASSED" %}
+                                            <span class="badge bg-success">{{ certificado.resultado }}</span>
+                                        {% elif certificado.resultado == "RECHAZADO" or certificado.resultado == "FAILED" %}
+                                            <span class="badge bg-danger">{{ certificado.resultado }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ certificado.resultado }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ certificado.laboratorio }}</td>
+                                    <td>
+                                        {% if certificado.extraido_exitosamente %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Sí
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-exclamation-circle"></i> No
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'certificado_detail' certificado.pk %}" class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i> Ver
+                                            </a>
+                                            <form method="POST" action="{% url 'eliminar_certificado' certificado.pk %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este certificado?');">
+                                                    <i class="bi bi-trash"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <h4 class="alert-heading">No hay certificados</h4>
+                    <p>Aún no has subido ningún certificado. <a href="{% url 'upload_certificado' %}">Sube tu primer certificado aquí</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f0f9ff !important;
+    }
+
+    .btn-group {
+        gap: 0.25rem;
+    }
+</style>
+{% endblock %}

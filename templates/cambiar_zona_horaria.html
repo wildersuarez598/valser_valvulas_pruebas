@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Cambiar Zona Horaria - Portal Valser{% endblock %}
+
+{% block content %}
+<div class="row mt-4 mb-4">
+    <div class="col-lg-8 mx-auto">
+        <h2>
+            <i class="fas fa-globe"></i> Cambiar Zona Horaria
+        </h2>
+        <p class="text-muted">Selecciona tu zona horaria para que las fechas y horas se muestren correctamente</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock"></i> Configuración de Zona Horaria
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="form-group mb-4">
+                        <label for="zona_horaria" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Zona Horaria
+                        </label>
+                        <select 
+                            id="zona_horaria" 
+                            name="zona_horaria" 
+                            class="form-select" 
+                            required
+                            onchange="actualizarPreview(this.value)"
+                        >
+                            <option value="">-- Selecciona tu zona horaria --</option>
+                            {% for zona_code, zona_name in zonas_horarias %}
+                                <option 
+                                    value="{{ zona_code }}"
+                                    {% if zona_code == zona_actual %}selected{% endif %}
+                                >
+                                    {{ zona_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted mt-2">
+                            Selecciona el país o región donde te encuentras
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Zona horaria actual:</strong> {{ zona_actual }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'usuarios:dashboard' %}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> ¿Por qué establecer tu zona horaria?
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    La zona horaria es importante para que veas todas las fechas y horas correctamente 
+                    en tu panel de control. Por ejemplo:
+                </p>
+                <ul>
+                    <li><strong>Bogotá (UTC-5):</strong> Si estás en Colombia</li>
+                    <li><strong>Guatemala (UTC-6):</strong> Si estás en Guatemala</li>
+                    <li><strong>México (UTC-6):</strong> Si estás en México</li>
+                    <li><strong>UTC:</strong> Para hora universal coordinada</li>
+                </ul>
+                <p class="mt-3">
+                    Todos tus registros de cerificados, servicios y alertas se mostrarán en tu zona horaria local.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function actualizarPreview(zona) {
+    // Puedes agregar aquí la lógica para mostrar una vista previa de la hora
+    if (zona) {
+        console.log('Zona seleccionada: ' + zona);
+    }
+}
+</script>
+
+{% endblock %}
+
+<style>
+.form-select {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    padding: 10px 12px;
+    font-size: 1rem;
+}
+
+.form-select:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+</style>

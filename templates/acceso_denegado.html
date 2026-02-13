@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Acceso Denegado - Portal Valser{% endblock %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-lg-6 mx-auto">
+        <div class="card border-danger">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-lock fa-5x text-danger mb-4" style="display: block;"></i>
+                <h2 class="card-title">Acceso Denegado</h2>
+                <p class="card-text text-muted">
+                    No tienes permisos para acceder a esta página.
+                </p>
+                <p class="text-muted">
+                    Si crees que esto es un error, contacta al administrador.
+                </p>
+                
+                <div class="mt-4">
+                    <a href="{% url 'usuarios:dashboard' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </a>
+                    <a href="{% url 'usuarios:logout' %}" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Portal Valser{% endblock %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <h2 class="card-title mb-4">
+                    <i class="fas fa-bars fa-3x mb-3" style="color: #1e40af;"></i>
+                </h2>
+                <h3>Bienvenido {{ user.get_full_name|default:user.username }}</h3>
+                <p class="text-muted">Estamos preparando tu panel personalizado...</p>
+                
+                {% if perfil %}
+                    {% if perfil.rol == 'cliente' %}
+                        <div class="alert alert-info mt-4">
+                            <strong>Rol:</strong> Cliente
+                            {% if perfil.empresa %}
+                                <br><strong>Empresa:</strong> {{ perfil.empresa.nombre }}
+                            {% endif %}
+                        </div>
+                    {% elif perfil.rol == 'comercial' %}
+                        <div class="alert alert-warning mt-4">
+                            <strong>Rol:</strong> Comercial
+                        </div>
+                    {% elif perfil.rol == 'admin' %}
+                        <div class="alert alert-danger mt-4">
+                            <strong>Rol:</strong> Administrador
+                        </div>
+                    {% endif %}
+                {% endif %}
+                
+                <p class="mt-4 text-muted">
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Redirigiendo a tu panel...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Redirigir automáticamente después de 2 segundos
+    setTimeout(function() {
+        window.location.href = window.location.href;
+    }, 2000);
+</script>
+{% endblock %}

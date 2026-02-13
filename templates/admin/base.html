@@ -1,0 +1,783 @@
+{% extends "admin/base.html" %}
+
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* ============================================
+           VARIABLES Y COLORES GLOBALES
+           ============================================ */
+        
+        :root {
+            --primary-color: #1e40af;
+            --primary-dark: #0f2d5f;
+            --primary-light: #f0f9ff;
+            --secondary-color: #dc2626;
+            --success-color: #16a34a;
+            --warning-color: #f59e0b;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --border-color: #cbd5e1;
+            --shadow: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --radius: 8px;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            --transition: all 0.2s ease;
+        }
+
+        /* ============================================
+           RESET - ELEMENTOS GLOBALES
+           ============================================ */
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background-color: var(--background) !important;
+        }
+
+        body {
+            background-color: var(--background) !important;
+            font-family: var(--font-family) !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+            color: var(--text-dark) !important;
+        }
+
+        /* ============================================
+           HEADER - BARRA SUPERIOR
+           ============================================ */
+        
+        #header {
+            background: var(--primary-color) !important;
+            padding: 16px 24px !important;
+            box-shadow: var(--shadow-md) !important;
+            border: none !important;
+        }
+
+        #header h1 {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            font-size: 1.4rem !important;
+            font-weight: 700 !important;
+        }
+
+        #header h1 a {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+
+        #header h1 a:hover {
+            color: #dbeafe !important;
+        }
+
+        #user-tools {
+            color: #dbeafe !important;
+            font-size: 13px !important;
+            margin-top: 10px !important;
+            display: flex !important;
+            gap: 15px !important;
+            align-items: center !important;
+        }
+
+        #user-tools a {
+            color: #dbeafe !important;
+            text-decoration: none !important;
+            transition: var(--transition) !important;
+        }
+
+        #user-tools a:hover {
+            color: #ffffff !important;
+        }
+
+        /* ============================================
+           SIDEBAR - NAVEGACIÓN LATERAL
+           ============================================ */
+        
+        #sidebar {
+            background-color: var(--surface) !important;
+            border-right: 1px solid var(--border-color) !important;
+            padding: 20px 0 !important;
+            width: 260px !important;
+            min-width: 260px !important;
+            max-width: 260px !important;
+            overflow-y: auto !important;
+        }
+
+        #nav-sidebar {
+            background-color: transparent !important;
+        }
+
+        .module {
+            background-color: var(--surface) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 6px !important;
+            margin: 0 12px 14px 12px !important;
+            padding: 0 !important;
+            box-shadow: var(--shadow) !important;
+            overflow: hidden !important;
+        }
+
+        .module:hover {
+            box-shadow: var(--shadow-md) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .module h2 {
+            background-color: var(--primary-color) !important;
+            border: none !important;
+            padding: 12px 14px !important;
+            margin: 0 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .module h2 a {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            text-decoration: none !important;
+        }
+
+        .module h2 a:hover {
+            color: #dbeafe !important;
+        }
+
+        .module ul {
+            padding: 4px 0 !important;
+            margin: 0 !important;
+            list-style: none !important;
+        }
+
+        .module li {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+        }
+
+        .module a {
+            display: block !important;
+            color: var(--primary-color) !important;
+            padding: 10px 16px !important;
+            text-decoration: none !important;
+            transition: var(--transition) !important;
+            font-size: 14px !important;
+            border-left: 3px solid transparent !important;
+        }
+
+        .module a:hover {
+            background-color: var(--primary-light) !important;
+            color: var(--primary-dark) !important;
+            border-left-color: var(--primary-color) !important;
+            padding-left: 18px !important;
+        }
+
+        /* ============================================
+           CONTENIDO PRINCIPAL
+           ============================================ */
+        
+        #content {
+            flex: 1 !important;
+            background-color: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 28px 32px !important;
+            overflow-y: auto !important;
+        }
+
+        #footer {
+            background-color: var(--surface) !important;
+            color: var(--text-light) !important;
+            padding: 16px 24px !important;
+            text-align: center !important;
+            border-top: 1px solid var(--border-color) !important;
+            font-size: 12px !important;
+        }
+
+        /* ============================================
+           ENCABEZADOS Y TÍTULOS
+           ============================================ */
+        
+        h1 {
+            color: var(--text-dark) !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 0 20px 0 !important;
+            font-weight: 700 !important;
+            font-size: 2rem !important;
+        }
+
+        /* Override para content h1 */
+        #content > h1 {
+            background-color: #1e40af !important;
+            color: #ffffff !important;
+            padding: 16px 24px !important;
+            margin: 0 0 24px 0 !important;
+            border-radius: 8px !important;
+            font-size: 1.8rem !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        }
+
+        h2 {
+            color: var(--text-dark) !important;
+            font-weight: 700 !important;
+            font-size: 1.3rem !important;
+            margin: 24px 0 16px 0 !important;
+            padding: 12px 16px !important;
+            border-bottom: 3px solid var(--primary-color) !important;
+            background-color: var(--primary-light) !important;
+            border-radius: 4px !important;
+        }
+
+        h3 {
+            color: var(--text-dark) !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            margin: 16px 0 10px 0 !important;
+        }
+
+        h4, h5, h6 {
+            color: var(--text-dark) !important;
+            font-weight: 700 !important;
+        }
+
+        /* ============================================
+           BOTONES - ESTILOS UNIFORMES
+           ============================================ */
+        
+        .button,
+        input[type="submit"],
+        a.button {
+            background-color: var(--primary-color) !important;
+            border: 1px solid var(--primary-color) !important;
+            color: #ffffff !important;
+            border-radius: 6px !important;
+            padding: 10px 18px !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            transition: var(--transition) !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        .button:hover,
+        input[type="submit"]:hover,
+        a.button:hover {
+            background-color: var(--primary-dark) !important;
+            border-color: var(--primary-dark) !important;
+            box-shadow: var(--shadow-md) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        .button:focus,
+        input[type="submit"]:focus,
+        a.button:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15) !important;
+        }
+
+        .button:active,
+        input[type="submit"]:active {
+            transform: translateY(0) !important;
+        }
+
+        .deletelink {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: #ffffff !important;
+        }
+
+        .deletelink:hover {
+            background-color: #991b1b !important;
+            border-color: #991b1b !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+
+        .addlink {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: #ffffff !important;
+        }
+
+        .addlink:hover {
+            background-color: #15803d !important;
+            border-color: #15803d !important;
+        }
+
+        /* ============================================
+           TABLAS Y LISTAS
+           ============================================ */
+        
+        #result_list {
+            border-collapse: collapse !important;
+            width: 100% !important;
+            background-color: var(--surface) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        #result_list thead {
+            background-color: var(--primary-color) !important;
+        }
+
+        #result_list th {
+            background-color: transparent !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            padding: 14px 12px !important;
+            text-align: left !important;
+            border-bottom: 2px solid var(--primary-dark) !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        #result_list td {
+            padding: 12px !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            color: var(--text-dark) !important;
+            font-size: 14px !important;
+        }
+
+        #result_list tbody tr {
+            transition: var(--transition) !important;
+            background-color: var(--surface) !important;
+        }
+
+        #result_list tbody tr:hover {
+            background-color: var(--primary-light) !important;
+        }
+
+        #result_list tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+
+        #result_list tbody tr:nth-child(even):hover {
+            background-color: var(--primary-light) !important;
+        }
+
+        /* ============================================
+           FORMULARIOS Y INPUTS
+           ============================================ */
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="time"],
+        input[type="search"],
+        select,
+        textarea {
+            border: 1px solid var(--border-color) !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+            font-family: var(--font-family) !important;
+            font-size: 14px !important;
+            background-color: var(--surface) !important;
+            color: var(--text-dark) !important;
+            transition: var(--transition) !important;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        input[type="datetime-local"]:focus,
+        input[type="time"]:focus,
+        input[type="search"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none !important;
+            border-color: var(--primary-color) !important;
+            background-color: var(--surface) !important;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1) !important;
+        }
+
+        input:disabled,
+        textarea:disabled,
+        select:disabled {
+            background-color: #f3f4f6 !important;
+            color: var(--text-light) !important;
+            cursor: not-allowed !important;
+        }
+
+        .form-row {
+            background-color: transparent !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            padding: 14px !important;
+            margin: 0 !important;
+        }
+
+        .form-row:last-child {
+            border-bottom: none !important;
+        }
+
+        .form-row label {
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            color: var(--text-dark) !important;
+            margin-bottom: 6px !important;
+            display: block !important;
+        }
+
+        .form-row:focus-within label {
+            color: var(--primary-color) !important;
+        }
+
+        /* ============================================
+           FIELDSETS - AGRUPACIONES
+           ============================================ */
+        
+        fieldset {
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            padding: 16px !important;
+            margin: 0 0 20px 0 !important;
+            background-color: var(--primary-light) !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        fieldset legend {
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+            padding: 10px 14px !important;
+            border-radius: 6px !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            margin-left: -16px !important;
+            margin-bottom: 12px !important;
+            display: block !important;
+        }
+
+        /* ============================================
+           BÚSQUEDA Y FILTROS
+           ============================================ */
+        
+        #searchbar {
+            background-color: var(--primary-light) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            padding: 16px !important;
+            margin-bottom: 20px !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        #searchbar input {
+            border: 1px solid var(--border-color) !important;
+            border-radius: 6px !important;
+            padding: 10px 12px !important;
+            background-color: var(--surface) !important;
+            font-size: 14px !important;
+            color: var(--text-dark) !important;
+        }
+
+        #searchbar input:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1) !important;
+        }
+
+        #changelist-filter {
+            background-color: var(--surface) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            padding: 18px !important;
+            margin: 0 0 20px 0 !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        #changelist-filter h2 {
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+            border-bottom: none !important;
+            font-weight: 700 !important;
+            padding: 10px 14px !important;
+            margin: -18px -18px 14px -18px !important;
+            font-size: 14px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+            border-radius: 8px 8px 0 0 !important;
+        }
+
+        #changelist-filter ul {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #changelist-filter li {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #changelist-filter a {
+            color: var(--primary-color) !important;
+            text-decoration: none !important;
+            font-size: 14px !important;
+            padding: 6px 8px !important;
+            border-radius: 4px !important;
+            transition: var(--transition) !important;
+            display: block !important;
+        }
+
+        #changelist-filter a:hover {
+            color: var(--primary-dark) !important;
+            background-color: var(--primary-light) !important;
+        }
+
+        /* ============================================
+           ALERTAS Y MENSAJES
+           ============================================ */
+        
+        .messagelist {
+            margin-bottom: 20px !important;
+            padding: 0 !important;
+            list-style: none !important;
+        }
+
+        .messagelist li {
+            border-radius: 6px !important;
+            border-left: 4px solid !important;
+            padding: 12px 14px !important;
+            margin-bottom: 10px !important;
+            list-style: none !important;
+            font-size: 14px !important;
+            box-shadow: var(--shadow) !important;
+            animation: slideDown 0.2s ease !important;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .messagelist .success {
+            background-color: #f0fdf4 !important;
+            border-left-color: var(--success-color) !important;
+            color: #185e22 !important;
+        }
+
+        .messagelist .error {
+            background-color: #fef2f2 !important;
+            border-left-color: var(--secondary-color) !important;
+            color: #7f1d1d !important;
+        }
+
+        .messagelist .warning {
+            background-color: #fffbeb !important;
+            border-left-color: var(--warning-color) !important;
+            color: #78350f !important;
+        }
+
+        .messagelist .info {
+            background-color: var(--primary-light) !important;
+            border-left-color: var(--primary-color) !important;
+            color: #0c4a6e !important;
+        }
+
+        /* ============================================
+           LINKS Y REFERENCIAS
+           ============================================ */
+        
+        a {
+            color: var(--primary-color) !important;
+            text-decoration: none !important;
+            transition: color 0.2s ease !important;
+        }
+
+        a:visited {
+            color: var(--primary-color) !important;
+        }
+
+        a:hover {
+            color: var(--primary-dark) !important;
+            text-decoration: underline !important;
+        }
+
+        /* ============================================
+           INLINES - FORMULARIOS RELACIONADOS
+           ============================================ */
+        
+        .inline-group {
+            border: 1px solid var(--border-color) !important;
+            border-radius: 8px !important;
+            padding: 16px !important;
+            margin: 20px 0 !important;
+            background-color: var(--primary-light) !important;
+            box-shadow: var(--shadow) !important;
+        }
+
+        .inline-group h2 {
+            border-bottom: 2px solid var(--primary-color) !important;
+            color: var(--text-dark) !important;
+            padding-bottom: 10px !important;
+            margin: 0 0 14px 0 !important;
+            font-size: 1.1rem !important;
+        }
+
+        .inline-group .add-row {
+            margin-top: 14px !important;
+        }
+
+        /* ============================================
+           READONLY Y ESTADOS
+           ============================================ */
+        
+        .readonly {
+            background-color: #f3f4f6 !important;
+            color: var(--text-dark) !important;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        /* ============================================
+           DASHBOARD INDEX
+           ============================================ */
+        
+        #content > table {
+            width: 100% !important;
+            background-color: var(--surface) !important;
+            border-collapse: collapse !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            box-shadow: var(--shadow) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        #content > table thead {
+            background-color: var(--primary-color) !important;
+        }
+
+        #content > table th {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            padding: 12px !important;
+            border-bottom: 2px solid var(--primary-dark) !important;
+            text-align: left !important;
+        }
+
+        #content > table td {
+            padding: 12px !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            color: var(--text-dark) !important;
+        }
+
+        /* ============================================
+           CHECKBOX Y RADIO
+           ============================================ */
+        
+        input[type="checkbox"],
+        input[type="radio"] {
+            accent-color: var(--primary-color) !important;
+            cursor: pointer !important;
+            width: 16px !important;
+            height: 16px !important;
+        }
+
+        /* ============================================
+           SUBMIT ROW
+           ============================================ */
+        
+        .submit-row {
+            padding: 16px 14px !important;
+            background-color: transparent !important;
+            border-top: 1px solid var(--border-color) !important;
+            margin-top: 20px !important;
+            display: flex !important;
+            gap: 10px !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        
+        @media (max-width: 1024px) {
+            #sidebar {
+                width: 220px !important;
+                min-width: 220px !important;
+                max-width: 220px !important;
+            }
+
+            #content {
+                padding: 20px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                display: none !important;
+            }
+
+            #content {
+                padding: 16px !important;
+            }
+
+            h1 {
+                font-size: 1.5rem !important;
+            }
+
+            .button,
+            input[type="submit"],
+            a.button {
+                padding: 8px 14px !important;
+                font-size: 13px !important;
+            }
+
+            #searchbar {
+                padding: 12px !important;
+            }
+
+            #changelist-filter {
+                padding: 12px !important;
+            }
+
+            .module {
+                margin: 0 8px 12px 8px !important;
+            }
+
+            .module h2 {
+                padding: 10px 12px !important;
+                font-size: 12px !important;
+            }
+
+            .module a {
+                padding: 8px 12px !important;
+                font-size: 13px !important;
+            }
+        }
+    </style>
+{% endblock %}

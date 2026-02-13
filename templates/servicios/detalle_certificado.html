@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Valser{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5">{{ titulo }}</h1>
+                    <a href="{% url 'certificado_list' %}" class="text-decoration-none">
+                        <i class="bi bi-chevron-left"></i> Volver a mis certificados
+                    </a>
+                </div>
+                <div>
+                    {% if certificado.resultado == "APROBADO" or certificado.resultado == "PASSED" %}
+                        <span class="badge bg-success p-3" style="font-size: 1rem;">
+                            <i class="bi bi-check-circle"></i> {{ certificado.resultado }}
+                        </span>
+                    {% elif certificado.resultado == "RECHAZADO" or certificado.resultado == "FAILED" %}
+                        <span class="badge bg-danger p-3" style="font-size: 1rem;">
+                            <i class="bi bi-x-circle"></i> {{ certificado.resultado }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-warning p-3" style="font-size: 1rem;">
+                            <i class="bi bi-exclamation-circle"></i> {{ certificado.resultado }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información General -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #1e40af; color: white;">
+                    <h5 class="mb-0">Información General</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Número de Certificado</h6>
+                            <p class="h5">{{ certificado.numero_certificado }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Tipo de Certificado</h6>
+                            <p class="h5">
+                                <span class="badge" style="background-color: #1e40af;">
+                                    {{ certificado.get_tipo_certificado_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Fecha de Emisión</h6>
+                            <p class="h5">{{ certificado.fecha_emision|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Fecha de Vencimiento</h6>
+                            <p class="h5">
+                                {% if certificado.fecha_vencimiento %}
+                                    {% if certificado.fecha_vencimiento < today %}
+                                        <span style="color: #dc2626;">{{ certificado.fecha_vencimiento|date:"d/m/Y" }} (Vencido)</span>
+                                    {% else %}
+                                        {{ certificado.fecha_vencimiento|date:"d/m/Y" }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">No especificado</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos Técnicos -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #1e40af; color: white;">
+                    <h5 class="mb-0">Datos Técnicos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Presión Inicial</h6>
+                            <p class="h5">{{ certificado.presion_inicial|default:"No disponible" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Presión Final</h6>
+                            <p class="h5">{{ certificado.presion_final|default:"No disponible" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Temperatura</h6>
+                            <p class="h5">{{ certificado.temperatura|default:"No disponible" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Resultado</h6>
+                            <p class="h5">{{ certificado.resultado|default:"No disponible" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Laboratorio -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #1e40af; color: white;">
+                    <h5 class="mb-0">Información del Laboratorio</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Laboratorio</h6>
+                            <p class="h5">{{ certificado.laboratorio|default:"No disponible" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Técnico Responsable</h6>
+                            <p class="h5">{{ certificado.tecnico_responsable|default:"No disponible" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notas de Calibración -->
+            {% if certificado.notas_calibracion %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header" style="background-color: #1e40af; color: white;">
+                        <h5 class="mb-0">Notas de Calibración</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ certificado.notas_calibracion|linebreaks }}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Estado de Extracción -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header" style="background-color: #1e40af; color: white;">
+                    <h5 class="mb-0">Estado de Procesamiento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Datos Extraídos</h6>
+                            <p class="h5">
+                                {% if certificado.extraido_exitosamente %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle"></i> Sí
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-exclamation-circle"></i> No
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Fecha de Extracción</h6>
+                            <p class="h5">
+                                {% if certificado.fecha_extraccion_datos %}
+                                    {{ certificado.fecha_extraccion_datos|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted">Pendiente</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archivo PDF -->
+            {% if certificado.archivo_pdf %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header" style="background-color: #1e40af; color: white;">
+                        <h5 class="mb-0">Archivo PDF</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>Nombre del archivo:</strong> {{ certificado.archivo_pdf.name }}
+                        </p>
+                        <p>
+                            <strong>Tamaño:</strong> {{ certificado.archivo_pdf.size|filesizeformat }}
+                        </p>
+                        <a href="{{ certificado.archivo_pdf.url }}" class="btn btn-primary" target="_blank">
+                            <i class="bi bi-download"></i> Descargar PDF
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Acciones -->
+            <div class="d-flex gap-2 mt-4">
+                <a href="{% url 'certificado_list' %}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <form method="POST" action="{% url 'eliminar_certificado' certificado.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('¿Estás seguro que deseas eliminar este certificado?');">
+                        <i class="bi bi-trash"></i> Eliminar Certificado
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0;
+        border-bottom: none;
+    }
+
+    .h5 {
+        color: #0f172a;
+    }
+
+    .text-muted {
+        color: #64748b !important;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
