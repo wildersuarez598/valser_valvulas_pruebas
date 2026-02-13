@@ -155,7 +155,8 @@ CSRF_TRUSTED_ORIGINS = environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:800
 
 # Security settings para producción
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = False  # Railway maneja SSL en el proxy
+    SESSION_COOKIE_SECURE = False  # Railway usa X-Forwarded-Proto
+    CSRF_COOKIE_SECURE = False
     SECURE_BROWSER_XSS_FILTER = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

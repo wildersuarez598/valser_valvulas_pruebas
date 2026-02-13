@@ -86,7 +86,7 @@ def cliente_dashboard(request):
         'usuario': request.user,
         'empresa': empresa,
         'valvulas': valvulas,
-        'total_valvulas': valvulas.count(),
+        'total_valvulas': valvulas.count() if hasattr(valvulas, 'count') else len(valvulas),
     }
     
     return render(request, 'cliente/dashboard.html', context)
