@@ -86,13 +86,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# Database - usar PostgreSQL en producción
-if environ.get('DATABASE_URL'):
+# Database - usar PostgreSQL en producción si existe
+DATABASE_URL = environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.strip():
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.config()
+        'default': dj_database_url.config(default=DATABASE_URL)
     }
 else:
+    # SQLite por defecto (funciona sin DATABASE_URL)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
