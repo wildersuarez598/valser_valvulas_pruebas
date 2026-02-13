@@ -27,7 +27,12 @@ SECRET_KEY = environ.get('SECRET_KEY', 'django-insecure-1=jzo0a_-d!w49vfm%=66)2v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Parse ALLOWED_HOSTS properly
+_allowed_hosts = environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+if ',' in _allowed_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',')]
+else:
+    ALLOWED_HOSTS = [_allowed_hosts.strip()]
 
 
 # Application definition
