@@ -59,7 +59,7 @@ class Documento(models.Model):
         ('otro', 'Otro'),
     ]
     
-    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='documentos')
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='documentos', null=True, blank=True, help_text="Servicio asociado (opcional si se vincula directamente a válvula)")
     valvula = models.ForeignKey(Valvula, on_delete=models.CASCADE, related_name='documentos', null=True, blank=True, help_text="Referencia directa a la válvula para hoja de vida")
     usuario_comercial = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='documentos_subidos')
     tipo_documento = models.CharField(max_length=50, choices=TIPO_DOCUMENTO_CHOICES)
@@ -67,30 +67,30 @@ class Documento(models.Model):
     nombre_original = models.CharField(max_length=255, blank=True, help_text="Nombre original del archivo")
     
     # Datos genéricos extraídos
-    numero_documento = models.CharField(max_length=100, blank=True, db_index=True)
+    numero_documento = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     fecha_documento = models.DateField(null=True, blank=True)
     fecha_vencimiento = models.DateField(null=True, blank=True)
-    tecnico_responsable = models.CharField(max_length=255, blank=True)
+    tecnico_responsable = models.CharField(max_length=255, blank=True, null=True)
     
     # Datos específicos para Calibración
-    presion_inicial = models.CharField(max_length=50, blank=True)
-    presion_final = models.CharField(max_length=50, blank=True)
-    temperatura = models.CharField(max_length=50, blank=True)
-    unidad_presion = models.CharField(max_length=20, blank=True)  # PSI, bar, atm, kPa
-    resultado_calibracion = models.CharField(max_length=50, blank=True)  # APROBADO/RECHAZADO
-    laboratorio = models.CharField(max_length=255, blank=True)
+    presion_inicial = models.CharField(max_length=50, blank=True, null=True)
+    presion_final = models.CharField(max_length=50, blank=True, null=True)
+    temperatura = models.CharField(max_length=50, blank=True, null=True)
+    unidad_presion = models.CharField(max_length=20, blank=True, null=True)  # PSI, bar, atm, kPa
+    resultado_calibracion = models.CharField(max_length=50, blank=True, null=True)  # APROBADO/RECHAZADO
+    laboratorio = models.CharField(max_length=255, blank=True, null=True)
     
     # Datos específicos para Mantenimiento
-    tipo_mantenimiento = models.CharField(max_length=100, blank=True)  # Preventivo/Correctivo
-    descripcion_trabajos = models.TextField(blank=True)
-    estado_valvula = models.CharField(max_length=100, blank=True)  # Bueno/Defectuoso
-    materiales_utilizados = models.TextField(blank=True)
+    tipo_mantenimiento = models.CharField(max_length=100, blank=True, null=True)  # Preventivo/Correctivo
+    descripcion_trabajos = models.TextField(blank=True, null=True)
+    estado_valvula = models.CharField(max_length=100, blank=True, null=True)  # Bueno/Defectuoso
+    materiales_utilizados = models.TextField(blank=True, null=True)
     duracion_horas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     proximo_mantenimiento = models.DateField(null=True, blank=True)
     
     # Estado de extracción
     extraido_exitosamente = models.BooleanField(default=False)
-    error_extraccion = models.TextField(blank=True, help_text="Descripción del error si falló la extracción")
+    error_extraccion = models.TextField(blank=True, null=True, help_text="Descripción del error si falló la extracción")
     fecha_extraccion_datos = models.DateTimeField(null=True, blank=True)
     
     # Auditoría
