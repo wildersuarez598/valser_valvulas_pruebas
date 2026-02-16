@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'servicios'
+
 urlpatterns = [
     # URLs para certificados
     path('certificados/', views.certificado_list, name='certificado_list'),
