@@ -19,7 +19,11 @@ class PDFExtractor:
         """Extrae texto de todo el PDF"""
         try:
             with pdfplumber.open(self.pdf_file) as pdf:
-                return '\n'.join(page.extract_text() or '' for page in pdf.pages)
+                text = '\n'.join(page.extract_text() or '' for page in pdf.pages)
+            # CRÍTICO: Resetear posición del archivo después de leerlo
+            # para que Django pueda guardarlo posteriormente
+            self.pdf_file.seek(0)
+            return text
         except Exception as e:
             raise ValueError(f"Error extrayendo texto del PDF: {str(e)}")
     
