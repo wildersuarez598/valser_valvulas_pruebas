@@ -27,7 +27,8 @@ urlpatterns = [
     path('auth/', include('usuarios.urls')),
     # Servicios y certificados
     path('servicios/', include('servicios.urls')),
-    
+    # Hoja de vida de válvulas
+    path('valvulas/', include('valvulas.urls')),
     # Redirección por defecto al login
     path('', login_view, name='home'),
 ]

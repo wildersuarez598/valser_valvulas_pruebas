@@ -50,7 +50,7 @@ class Servicio(models.Model):
 class Documento(models.Model):
     """
     Modelo genérico para almacenar cualquier tipo de documento (Certificado, Informe, etc)
-    Soporta múltiples documentos por servicio con extracción automática de datos
+    Soporta múltiples documentos por servicio/válvula con extracción automática de datos
     """
     TIPO_DOCUMENTO_CHOICES = [
         ('calibracion', 'Certificado de Calibración'),
@@ -60,6 +60,7 @@ class Documento(models.Model):
     ]
     
     servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='documentos')
+    valvula = models.ForeignKey(Valvula, on_delete=models.CASCADE, related_name='documentos', null=True, blank=True, help_text="Referencia directa a la válvula para hoja de vida")
     usuario_comercial = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='documentos_subidos')
     tipo_documento = models.CharField(max_length=50, choices=TIPO_DOCUMENTO_CHOICES)
     archivo_pdf = models.FileField(upload_to='documentos/%Y/%m/%d/')
@@ -124,6 +125,49 @@ class Documento(models.Model):
         from django.utils import timezone
         delta = self.fecha_vencimiento - timezone.now().date()
         return delta.days
+    
+    def enlazar_valvula_por_numero_serie(self, numero_serie):
+        """
+        Busca y enlaza la válvula más una válvula basada en número de serie
+        Si no existe, la crea con datos básicos
+        Retorna: (valvula, creada)
+        """
+        if not numero_serie:
+            return None, False
+        
+        # Buscar válvula existente
+        try:
+            valvula = Valvula.objects.get(numero_serie=numero_serie)
+            self.valvula = valvula
+            return valvula, False
+        except Valvula.DoesNotExist:
+            # Crear nueva válvula si no existe
+            valvula = Valvula(
+                numero_serie=numero_serie,
+                marca=getattr(self, '_marca_extraida', ''),
+                modelo=getattr(self, '_modelo_extraido', ''),
+                tamaño=getattr(self, '_tamaño_extraido', ''),
+                empresa=self.servicio.valvula.empresa if self.servicio and self.servicio.valvula else None,
+                tipo='alivio' if self.tipo_documento == 'calibracion' else 'control',
+            )
+            valvula.save()
+            self.valvula = valvula
+            return valvula, True
+    
+    def actualizar_fechas_hoja_vida(self):
+        """
+        Actualiza las fechas de calibración/mantenimiento en la Hoja de Vida de la válvula
+        """
+        if not self.valvula or not self.extraido_exitosamente:
+            return
+        
+        if self.tipo_documento == 'calibracion' and self.fecha_documento:
+            self.valvula.fecha_ultima_calibracion = self.fecha_documento
+            self.valvula.save(update_fields=['fecha_ultima_calibracion', 'fecha_actualizacion'])
+        
+        elif self.tipo_documento in ['mantenimiento', 'reparacion'] and self.fecha_documento:
+            self.valvula.fecha_ultimo_servicio = self.fecha_documento
+            self.valvula.save(update_fields=['fecha_ultimo_servicio', 'fecha_actualizacion'])
 
 
 class Certificado(models.Model):

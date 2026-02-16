@@ -69,6 +69,11 @@ class CertificadoCalibracionExtractor(PDFExtractor):
                 r'(?:N|Nº|No)\.?[\s:]*([A-Z0-9\-\/]+)',
                 r'Número[\s:]*([A-Z0-9\-\/]+)'
             ),
+            'numero_serie': self.find_pattern(
+                r'(?:Número[\s]de[\s]Serie|Serial[\s]Number|S/N|SN)[\s:]*([A-Z0-9\-]+)',
+                r'(?:Serie)[\s:]*([A-Z0-9\-]+)',
+                r'(?:Válvula)[\s:]*([A-Z0-9\-]+)'
+            ),
             'fecha_emision': self.find_pattern(
                 r'(?:Fecha|Emisión|Date|Emitted)[\s:]*(\d{1,2}[\s\-\/]\d{1,2}[\s\-\/]\d{4})',
                 r'(\d{4})\-(\d{2})\-(\d{2})'
@@ -155,6 +160,11 @@ class InformeMantenimientoExtractor(PDFExtractor):
                 r'(?:Informe|Reporte|Report)[\s:]*([A-Z0-9\-\/]+)',
                 r'(?:N|Nº|No)\.?[\s:]*([A-Z0-9\-\/]+)',
                 r'Número[\s:]*([A-Z0-9\-\/]+)'
+            ),
+            'numero_serie': self.find_pattern(
+                r'(?:Número[\s]de[\s]Serie|Serial[\s]Number|S/N|SN)[\s:]*([A-Z0-9\-]+)',
+                r'(?:Serie)[\s:]*([A-Z0-9\-]+)',
+                r'(?:Válvula)[\s:]*([A-Z0-9\-]+)'
             ),
             'fecha_mantenimiento': self.find_pattern(
                 r'(?:Fecha|Mantenimiento|Date|Service[\s]Date)[\s:]*(\d{1,2}[\s\-\/]\d{1,2}[\s\-\/]\d{4})',

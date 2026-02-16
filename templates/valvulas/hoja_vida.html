@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hoja de Vida - {{ valvula.numero_serie }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5">Hoja de Vida de Válvula</h1>
+                    <p class="lead text-muted">{{ valvula.numero_serie }} - {{ valvula.marca }} {{ valvula.modelo }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'valvulas:editar' valvula.id %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-edit"></i> Editar Datos
+                    </a>
+                    <a href="{% url 'valvulas:lista' %}" class="btn btn-secondary btn-lg">
+                        Volver a lista
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alertas de estado -->
+            {% if requiere_calibracion %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Requiere Calibración</strong> - La válvula requiere calibración (última: {{ valvula.fecha_ultima_calibracion|date:"d/m/Y" }})
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+            
+            {% if requiere_mantenimiento %}
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Requiere Mantenimiento</strong> - La válvula requiere mantenimiento (última: {{ valvula.fecha_ultimo_servicio|date:"d/m/Y" }})
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endif %}
+
+            <!-- Tarjetas de información -->
+            <div class="row mb-4">
+                <!-- Información General -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información General</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td><strong>Número Serie:</strong></td>
+                                    <td>{{ valvula.numero_serie }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TAG/Ubicación:</strong></td>
+                                    <td>{{ valvula.tag_localizacion|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ubicación Física:</strong></td>
+                                    <td>{{ valvula.ubicacion|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Marca:</strong></td>
+                                    <td>{{ valvula.marca }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Modelo:</strong></td>
+                                    <td>{{ valvula.modelo }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tamaño:</strong></td>
+                                    <td>{{ valvula.tamaño }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tipo:</strong></td>
+                                    <td><span class="badge bg-info">{{ valvula.get_tipo_display }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Estado:</strong></td>
+                                    <td>
+                                        {% if valvula.estado == 'activa' %}
+                                            <span class="badge bg-success">Activa</span>
+                                        {% elif valvula.estado == 'inactiva' %}
+                                            <span class="badge bg-secondary">Inactiva</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Descartada</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Especificaciones Técnicas -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-cogs"></i> Especificaciones Técnicas</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td><strong>Presión Nominal:</strong></td>
+                                    <td>{{ valvula.presion_nominal|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Presión SET:</strong></td>
+                                    <td>{{ valvula.presion_set|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Temperatura Nominal:</strong></td>
+                                    <td>{{ valvula.temperatura_nominal|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Material:</strong></td>
+                                    <td>{{ valvula.material|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Norma Aplicable:</strong></td>
+                                    <td>{{ valvula.norma_aplicable|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Instalación:</strong></td>
+                                    <td>{{ valvula.fecha_instalacion|date:"d/m/Y"|default:"—" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial de Servicios -->
+            <div class="row mb-4">
+                <!-- Última Calibración -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-tools"></i> Última Calibración</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if ultima_calibracion %}
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td><strong>Fecha:</strong></td>
+                                        <td>{{ ultima_calibracion.fecha_documento|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Hace:</strong></td>
+                                        <td>{{ valvula.dias_desde_ultima_calibracion }} días</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Número:</strong></td>
+                                        <td>{{ ultima_calibracion.numero_documento }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Laboratorio:</strong></td>
+                                        <td>{{ ultima_calibracion.laboratorio|default:"—" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Técnico:</strong></td>
+                                        <td>{{ ultima_calibracion.tecnico_responsable|default:"—" }}</td>
+                                    </tr>
+                                    {% if ultima_calibracion.fecha_vencimiento %}
+                                    <tr>
+                                        <td><strong>Vencimiento:</strong></td>
+                                        <td>
+                                            {{ ultima_calibracion.fecha_vencimiento|date:"d/m/Y" }}
+                                            {% if ultima_calibracion.esta_vigente %}
+                                                <span class="badge bg-success ms-2">Vigente</span>
+                                            {% else %}
+                                                <span class="badge bg-danger ms-2">Vencida</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                                <a href="{% url 'valvulas:descargar_documento' ultima_calibracion.id %}" class="btn btn-sm btn-primary mt-2">
+                                    <i class="fas fa-download"></i> Descargar PDF
+                                </a>
+                            {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle"></i> No hay registro de calibraciones
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Último Mantenimiento -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-wrench"></i> Último Mantenimiento</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if ultimo_mantenimiento %}
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td><strong>Fecha:</strong></td>
+                                        <td>{{ ultimo_mantenimiento.fecha_documento|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Hace:</strong></td>
+                                        <td>{{ valvula.dias_desde_ultimo_servicio }} días</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tipo:</strong></td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ ultimo_mantenimiento.tipo_mantenimiento|default:ultimo_mantenimiento.get_tipo_documento_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Técnico:</strong></td>
+                                        <td>{{ ultimo_mantenimiento.tecnico_responsable|default:"—" }}</td>
+                                    </tr>
+                                    {% if ultimo_mantenimiento.proximo_mantenimiento %}
+                                    <tr>
+                                        <td><strong>Próximo:</strong></td>
+                                        <td>{{ ultimo_mantenimiento.proximo_mantenimiento|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                                <a href="{% url 'valvulas:descargar_documento' ultimo_mantenimiento.id %}" class="btn btn-sm btn-primary mt-2">
+                                    <i class="fas fa-download"></i> Descargar PDF
+                                </a>
+                            {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle"></i> No hay registro de mantenimientos
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial completo de documentos -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Historial de Documentos</h5>
+                </div>
+                <div class="card-body">
+                    {% if documentos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Número</th>
+                                        <th>Detalles</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doc in documentos %}
+                                    <tr>
+                                        <td><strong>{{ doc.fecha_documento|date:"d/m/Y" }}</strong></td>
+                                        <td>
+                                            {% if doc.tipo_documento == 'calibracion' %}
+                                                <span class="badge bg-warning">Calibración</span>
+                                            {% elif doc.tipo_documento == 'mantenimiento' %}
+                                                <span class="badge bg-info">Mantenimiento</span>
+                                            {% elif doc.tipo_documento == 'reparacion' %}
+                                                <span class="badge bg-danger">Reparación</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ doc.get_tipo_documento_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ doc.numero_documento|default:"—" }}</td>
+                                        <td>
+                                            {{ doc.tecnico_responsable|default:"—" }}
+                                            {% if doc.laboratorio %}
+                                                <small class="text-muted">({{ doc.laboratorio }})</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'valvulas:descargar_documento' doc.id %}" class="btn btn-sm btn-outline-primary" title="Descargar PDF">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i> No hay documentos registrados para esta válvula
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Observaciones -->
+            {% if valvula.observaciones %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Observaciones</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ valvula.observaciones|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .card {
+        border: none;
+    }
+    
+    .card-header {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+    
+    .table-sm td {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+</style>
+{% endblock %}

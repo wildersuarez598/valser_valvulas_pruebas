@@ -101,6 +101,24 @@ def upload_certificado(request):
             
             documento.save()
             
+            # Auto-identificar válvula por número de serie y actualizar hoja de vida
+            numero_serie = extracted_data.get('numero_serie') or extracted_data.get('serial_number')
+            if numero_serie:
+                try:
+                    valvula, fue_creada = documento.enlazar_valvula_por_numero_serie(numero_serie)
+                    documento.save()  # Guardar la relación valvula
+                    
+                    # Actualizar fechas en la hoja de vida de la válvula
+                    documento.actualizar_fechas_hoja_vida()
+                    
+                    if fue_creada:
+                        logger.info(f'Nueva válvula creada automáticamente: S/N {numero_serie}')
+                    else:
+                        logger.info(f'Válvula identificada: {valvula.marca} {valvula.modelo} (S/N {numero_serie})')
+                except Exception as e:
+                    logger.warning(f'Error al enlazar válvula: {str(e)}')
+                    # No interrumpir el flujo si hay error en auto-identificación
+            
             tipo_display = documento.get_tipo_documento_display()
             numero_doc = documento.numero_documento or '(sin número)'
             messages.success(
