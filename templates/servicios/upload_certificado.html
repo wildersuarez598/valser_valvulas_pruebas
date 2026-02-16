@@ -176,7 +176,35 @@
         margin-bottom: 0;
     }
 </style>
-{% endblock %}
+
+<!-- Script para manejo del drag and drop -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('archivo_pdf');
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#f0f0f0';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = 'transparent';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                // Trigger change event
+                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+
         dropZone.addEventListener('click', () => {
             fileInput.click();
         });
