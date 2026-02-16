@@ -15,18 +15,42 @@ logger = logging.getLogger(__name__)
 
 
 def _parse_date(date_str):
-    """Intenta parsear una cadena de fecha a objeto date"""
-    if not date_str:
+    """
+    Intenta parsear una cadena de fecha a objeto date.
+    Soporta formatos comunes: DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD, etc.
+    
+    Args:
+        date_str: String con la fecha a parsear
+        
+    Returns:
+        datetime.date object o None si no se puede parsear
+    """
+    if not date_str or not isinstance(date_str, str):
         return None
     
-    # Formatos comunes a intentar
-    formats = ['%d/%m/%Y', '%d-%m-%Y', '%d.%m.%Y', '%Y-%m-%d']
+    # Limpiar espacios
+    date_str = date_str.strip()
+    
+    # Formatos comunes a intentar (en orden de probabilidad)
+    formats = [
+        '%d/%m/%Y',      # 03/06/2025
+        '%d-%m-%Y',      # 03-06-2025
+        '%d.%m.%Y',      # 03.06.2025
+        '%Y-%m-%d',      # 2025-06-03
+        '%d/%m/%y',      # 03/06/25
+        '%d-%m-%y',      # 03-06-25
+        '%d %m %Y',      # 03 06 2025
+        '%m/%d/%Y',      # 06/03/2025 (formato US)
+    ]
+    
     for fmt in formats:
         try:
             return datetime.strptime(date_str, fmt).date()
         except (ValueError, TypeError):
             continue
     
+    # Si no se puede parsear, registrar advertencia
+    logger.warning(f'No se pudo parsear fecha: "{date_str}". Se ignorará.')
     return None
 
 
@@ -81,8 +105,8 @@ def upload_certificado(request):
             
             # Llenar campos según tipo de documento
             if doc_type == 'calibracion':
-                documento.fecha_documento = extracted_data.get('fecha_emision') or timezone.now().date()
-                documento.fecha_vencimiento = extracted_data.get('fecha_vencimiento')
+                documento.fecha_documento = _parse_date(extracted_data.get('fecha_emision')) or timezone.now().date()
+                documento.fecha_vencimiento = _parse_date(extracted_data.get('fecha_vencimiento'))
                 documento.presion_inicial = extracted_data.get('presion_inicial', '')
                 documento.presion_final = extracted_data.get('presion_final', '')
                 documento.temperatura = extracted_data.get('temperatura', '')
@@ -91,7 +115,7 @@ def upload_certificado(request):
                 documento.unidad_presion = extracted_data.get('unidad_presion', '')
             
             elif doc_type == 'mantenimiento':
-                documento.fecha_documento = extracted_data.get('fecha_emision') or timezone.now().date()
+                documento.fecha_documento = _parse_date(extracted_data.get('fecha_emision')) or timezone.now().date()
                 documento.tipo_mantenimiento = extracted_data.get('tipo_mantenimiento', '')
                 documento.descripcion_trabajos = extracted_data.get('descripcion_trabajos', '')
                 documento.estado_valvula = extracted_data.get('estado_valvula', '')
@@ -128,8 +152,20 @@ def upload_certificado(request):
             return redirect('servicios:certificado_list')
         
         except Exception as e:
-            mensaje_error = f'Error al procesar el documento: {str(e)}'
-            logger.error(mensaje_error, exc_info=True)
+            # Mejorar mensaje de error para problemas de extracción/validación
+            error_msg = str(e)
+            
+            # Detectar errores de validación de fecha
+            if 'formato de fecha' in error_msg.lower() or 'dateformat' in error_msg.lower():
+                mensaje_error = (
+                    'Error al procesar fechas en el documento. '
+                    'Asegúrate de que el PDF contenga fechas válidas en formato DD-MM-YYYY. '
+                    'Puedes editar manualmente las fechas después de la carga.'
+                )
+            else:
+                mensaje_error = f'Error al procesar el documento: {error_msg}'
+            
+            logger.error(f'Error en upload_certificado: {error_msg}', exc_info=True)
             messages.error(request, mensaje_error)
     
     # GET request - mostrar formulario

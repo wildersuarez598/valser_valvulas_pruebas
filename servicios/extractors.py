@@ -75,12 +75,14 @@ class CertificadoCalibracionExtractor(PDFExtractor):
                 r'(?:Válvula)[\s:]*([A-Z0-9\-]+)'
             ),
             'fecha_emision': self.find_pattern(
-                r'(?:Fecha|Emisión|Date|Emitted)[\s:]*(\d{1,2}[\s\-\/]\d{1,2}[\s\-\/]\d{4})',
-                r'(\d{4})\-(\d{2})\-(\d{2})'
+                r'(?:Fecha|Emisión|Date|Emitted|FECHA)[\s:]*(\d{1,2}[\s\-\/\.]\d{1,2}[\s\-\/\.]\d{4})',
+                r'(\d{4})[\s\-\/](\d{1,2})[\s\-\/](\d{1,2})',
+                r'(\d{1,2}[\s\-\/\.]\d{1,2}[\s\-\/\.]\d{4})',  # Captura general de DD-MM-YYYY
             ),
             'fecha_vencimiento': self.find_pattern(
-                r'(?:Vencimiento|Válido hasta|Expiration|Valid until)[\s:]*(\d{1,2}[\s\-\/]\d{1,2}[\s\-\/]\d{4})',
-                r'(?:Próxima calibración)[\s:]*(\d{1,2}[\s\-\/]\d{1,2}[\s\-\/]\d{4})'
+                r'(?:Vencimiento|Válido hasta|Expiration|Valid until|VENCIMIENTO)[\s:]*(\d{1,2}[\s\-\/\.]\d{1,2}[\s\-\/\.]\d{4})',
+                r'(?:Próxima calibración|Next calibration)[\s:]*(\d{1,2}[\s\-\/\.]\d{1,2}[\s\-\/\.]\d{4})',
+                r'(\d{1,2}[\s\-\/\.]\d{1,2}[\s\-\/\.]\d{4})',  # Captura general
             ),
             'presion_inicial': self.find_pattern(
                 r'(?:Presión|Pressure)[\s]inicial[\s:]*([0-9.]+)',
