@@ -10,7 +10,6 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('cliente/dashboard/', views.cliente_dashboard, name='cliente_dashboard'),
     path('comercial/dashboard/', views.comercial_dashboard, name='comercial_dashboard'),
     path('cambiar_zona_horaria/', views.cambiar_zona_horaria, name='cambiar_zona_horaria'),

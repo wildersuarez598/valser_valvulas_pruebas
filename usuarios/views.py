@@ -61,7 +61,7 @@ def dashboard(request):
     elif perfil.rol == 'comercial':
         return redirect('usuarios:comercial_dashboard')
     elif perfil.rol == 'admin' or request.user.is_superuser:
-        return redirect('usuarios:admin_dashboard')
+        return redirect('/admin/')
     
     return render(request, 'dashboard.html', context)
 
@@ -130,34 +130,6 @@ def comercial_dashboard(request):
 def acceso_denegado(request):
     """Vista cuando se deniega acceso"""
     return render(request, 'acceso_denegado.html', status=403)
-
-
-@login_required(login_url='usuarios:login')
-def admin_dashboard(request):
-    """Dashboard para administradores"""
-    try:
-        perfil = request.user.perfil
-    except PerfilUsuario.DoesNotExist:
-        perfil = None
-    
-    if not request.user.is_superuser and (not perfil or perfil.rol != 'admin'):
-        messages.error(request, 'Acceso denegado. Solo administradores.')
-        return redirect('usuarios:dashboard')
-    
-    # Estadísticas para el admin
-    from servicios.models import Certificado
-    from clientes.models import Empresa
-    from valvulas.models import Valvula
-    
-    context = {
-        'usuario': request.user,
-        'total_empresas': Empresa.objects.count(),
-        'total_valvulas': Valvula.objects.count(),
-        'total_certificados': Certificado.objects.count(),
-        'total_usuarios': User.objects.count(),
-    }
-    
-    return render(request, 'admin/dashboard.html', context)
 
 
 @login_required(login_url='usuarios:login')
