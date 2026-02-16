@@ -47,17 +47,96 @@ class Servicio(models.Model):
         return f"{self.get_tipo_servicio_display()} - {self.valvula.numero_serie} ({self.fecha_servicio})"
 
 
+class Documento(models.Model):
+    """
+    Modelo genérico para almacenar cualquier tipo de documento (Certificado, Informe, etc)
+    Soporta múltiples documentos por servicio con extracción automática de datos
+    """
+    TIPO_DOCUMENTO_CHOICES = [
+        ('calibracion', 'Certificado de Calibración'),
+        ('mantenimiento', 'Informe de Mantenimiento'),
+        ('reparacion', 'Informe de Reparación'),
+        ('otro', 'Otro'),
+    ]
+    
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, related_name='documentos')
+    usuario_comercial = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='documentos_subidos')
+    tipo_documento = models.CharField(max_length=50, choices=TIPO_DOCUMENTO_CHOICES)
+    archivo_pdf = models.FileField(upload_to='documentos/%Y/%m/%d/')
+    nombre_original = models.CharField(max_length=255, blank=True, help_text="Nombre original del archivo")
+    
+    # Datos genéricos extraídos
+    numero_documento = models.CharField(max_length=100, blank=True, db_index=True)
+    fecha_documento = models.DateField(null=True, blank=True)
+    fecha_vencimiento = models.DateField(null=True, blank=True)
+    tecnico_responsable = models.CharField(max_length=255, blank=True)
+    
+    # Datos específicos para Calibración
+    presion_inicial = models.CharField(max_length=50, blank=True)
+    presion_final = models.CharField(max_length=50, blank=True)
+    temperatura = models.CharField(max_length=50, blank=True)
+    unidad_presion = models.CharField(max_length=20, blank=True)  # PSI, bar, atm, kPa
+    resultado_calibracion = models.CharField(max_length=50, blank=True)  # APROBADO/RECHAZADO
+    laboratorio = models.CharField(max_length=255, blank=True)
+    
+    # Datos específicos para Mantenimiento
+    tipo_mantenimiento = models.CharField(max_length=100, blank=True)  # Preventivo/Correctivo
+    descripcion_trabajos = models.TextField(blank=True)
+    estado_valvula = models.CharField(max_length=100, blank=True)  # Bueno/Defectuoso
+    materiales_utilizados = models.TextField(blank=True)
+    duracion_horas = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    proximo_mantenimiento = models.DateField(null=True, blank=True)
+    
+    # Estado de extracción
+    extraido_exitosamente = models.BooleanField(default=False)
+    error_extraccion = models.TextField(blank=True, help_text="Descripción del error si falló la extracción")
+    fecha_extraccion_datos = models.DateTimeField(null=True, blank=True)
+    
+    # Auditoría
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Documento"
+        verbose_name_plural = "Documentos"
+        ordering = ['-fecha_documento', '-fecha_creacion']
+        indexes = [
+            models.Index(fields=['tipo_documento', 'servicio']),
+            models.Index(fields=['numero_documento']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_tipo_documento_display()} {self.numero_documento or 'Sin #'} - {self.servicio.valvula.numero_serie}"
+    
+    @property
+    def esta_vigente(self):
+        """Verifica si el documento está vigente"""
+        if self.fecha_vencimiento is None:
+            return True
+        from django.utils import timezone
+        return self.fecha_vencimiento >= timezone.now().date()
+    
+    @property
+    def dias_para_vencer(self):
+        """Retorna días faltantes para vencer (negativo si ya venció)"""
+        if self.fecha_vencimiento is None:
+            return None
+        from django.utils import timezone
+        delta = self.fecha_vencimiento - timezone.now().date()
+        return delta.days
+
+
 class Certificado(models.Model):
     """
-    Modelo para almacenar certificados de calibración y mantenimiento
-    Contiene la información extraída del PDF
+    DEPRECATED: Modelo legado mantenido para compatibilidad con migraciones antiguas
+    Usar modelo 'Documento' en su lugar
     """
     TIPO_CERTIFICADO_CHOICES = [
         ('calibracion', 'Calibración'),
         ('mantenimiento', 'Mantenimiento'),
     ]
     
-    servicio = models.OneToOneField(Servicio, on_delete=models.CASCADE, related_name='certificado', null=True, blank=True)
+    servicio = models.OneToOneField(Servicio, on_delete=models.CASCADE, related_name='certificado_legacy', null=True, blank=True)
     usuario_comercial = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='certificados_subidos')
     tipo_certificado = models.CharField(max_length=50, choices=TIPO_CERTIFICADO_CHOICES)
     archivo_pdf = models.FileField(upload_to='certificados/%Y/%m/%d/')
@@ -69,7 +148,7 @@ class Certificado(models.Model):
     presion_inicial = models.CharField(max_length=50, blank=True)
     presion_final = models.CharField(max_length=50, blank=True)
     temperatura = models.CharField(max_length=50, blank=True)
-    resultado = models.CharField(max_length=50, blank=True)  # APROBADO/RECHAZADO
+    resultado = models.CharField(max_length=50, blank=True)
     notas_calibracion = models.TextField(blank=True)
     
     # Información del laboratorio/técnico
@@ -77,13 +156,13 @@ class Certificado(models.Model):
     tecnico_responsable = models.CharField(max_length=255, blank=True)
     
     # Estado
-    extraido_exitosamente = models.BooleanField(default=False, help_text="Indica si los datos fueron extraídos exitosamente del PDF")
+    extraido_exitosamente = models.BooleanField(default=False)
     fecha_extraccion_datos = models.DateTimeField(null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = "Certificado"
-        verbose_name_plural = "Certificados"
+        verbose_name = "Certificado (Legado)"
+        verbose_name_plural = "Certificados (Legado)"
         ordering = ['-fecha_emision']
     
     def __str__(self):
@@ -96,6 +175,7 @@ class Certificado(models.Model):
             return True
         from django.utils import timezone
         return self.fecha_vencimiento >= timezone.now().date()
+
 
 
 class AlertaServicio(models.Model):

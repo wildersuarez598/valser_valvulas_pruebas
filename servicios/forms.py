@@ -1,5 +1,5 @@
 from django import forms
-from servicios.models import Certificado, Servicio
+from servicios.models import Certificado, Documento, Servicio
 
 
 class CertificadoForm(forms.ModelForm):
@@ -75,6 +75,54 @@ class CertificadoForm(forms.ModelForm):
             'tecnico_responsable': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Nombre del técnico'
+            }),
+        }
+
+    def clean_archivo_pdf(self):
+        """Valida que el archivo sea PDF y no exceda 10MB"""
+        archivo = self.cleaned_data.get('archivo_pdf')
+        if archivo:
+            # Verificar tamaño
+            if archivo.size > 10 * 1024 * 1024:  # 10MB
+                raise forms.ValidationError('El archivo no puede exceder 10MB')
+            
+            # Verificar extensión
+            if not archivo.name.lower().endswith('.pdf'):
+                raise forms.ValidationError('Solo se aceptan archivos PDF')
+        
+        return archivo
+
+
+class DocumentoForm(forms.ModelForm):
+    """
+    Formulario para crear/editar documentos (certificados e informes)
+    Permite al comercial subir archivos PDF con detección automática de tipo
+    """
+    
+    class Meta:
+        model = Documento
+        fields = [
+            'archivo_pdf',
+            'servicio',
+            'fecha_documento',
+            'fecha_vencimiento',
+        ]
+        widgets = {
+            'archivo_pdf': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': '.pdf',
+                'required': True
+            }),
+            'servicio': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            'fecha_documento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'fecha_vencimiento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
             }),
         }
 
