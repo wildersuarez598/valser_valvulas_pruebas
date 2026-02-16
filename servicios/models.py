@@ -141,13 +141,20 @@ class Documento(models.Model):
             self.valvula = valvula
             return valvula, False
         except Valvula.DoesNotExist:
+            # Obtener empresa del servicio o usuario comercial
+            empresa = None
+            if self.servicio and self.servicio.valvula:
+                empresa = self.servicio.valvula.empresa
+            elif self.usuario_comercial and hasattr(self.usuario_comercial, 'perfil'):
+                empresa = self.usuario_comercial.perfil.empresa
+            
             # Crear nueva válvula si no existe
             valvula = Valvula(
                 numero_serie=numero_serie,
                 marca=getattr(self, '_marca_extraida', ''),
                 modelo=getattr(self, '_modelo_extraido', ''),
                 tamaño=getattr(self, '_tamaño_extraido', ''),
-                empresa=self.servicio.valvula.empresa if self.servicio and self.servicio.valvula else None,
+                empresa=empresa,
                 tipo='alivio' if self.tipo_documento == 'calibracion' else 'control',
             )
             valvula.save()

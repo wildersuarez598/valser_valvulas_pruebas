@@ -133,7 +133,13 @@ def upload_certificado(request):
             messages.error(request, mensaje_error)
     
     # GET request - mostrar formulario
-    servicios = Servicio.objects.filter(usuario_comercial=request.user) if hasattr(request.user, 'perfil') else Servicio.objects.all()
+    servicios = Servicio.objects.none()
+    if hasattr(request.user, 'perfil'):
+        if request.user.perfil.rol == 'admin':
+            servicios = Servicio.objects.all()
+        else:
+            # Filtrar servicios del comercial actual
+            servicios = Servicio.objects.filter(tecnico__usuario=request.user)
     
     context = {
         'titulo': 'Subir Documento',
