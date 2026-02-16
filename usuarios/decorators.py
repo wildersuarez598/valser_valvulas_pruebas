@@ -22,7 +22,7 @@ def requiere_rol(*roles):
     """
     def decorator(view_func):
         @wraps(view_func)
-        @login_required(login_url='login')
+        @login_required(login_url='/login/')
         def wrapper(request, *args, **kwargs):
             try:
                 perfil = request.user.perfil
@@ -32,7 +32,7 @@ def requiere_rol(*roles):
                 pass
             
             messages.error(request, 'No tienes permiso para acceder a esta página.')
-            return redirect('acceso_denegado')
+            return redirect('/acceso_denegado/')
         return wrapper
     return decorator
 
@@ -40,7 +40,7 @@ def requiere_rol(*roles):
 def requiere_cliente(view_func):
     """Decorador simplificado para requerir rol de cliente"""
     @wraps(view_func)
-    @login_required(login_url='login')
+    @login_required(login_url='/login/')
     def wrapper(request, *args, **kwargs):
         try:
             perfil = request.user.perfil
@@ -50,14 +50,14 @@ def requiere_cliente(view_func):
             pass
         
         messages.error(request, 'Acceso solo para clientes.')
-        return redirect('acceso_denegado')
+        return redirect('/acceso_denegado/')
     return wrapper
 
 
 def requiere_comercial(view_func):
     """Decorador simplificado para requerir rol de comercial"""
     @wraps(view_func)
-    @login_required(login_url='login')
+    @login_required(login_url='/login/')
     def wrapper(request, *args, **kwargs):
         try:
             perfil = request.user.perfil
@@ -67,14 +67,14 @@ def requiere_comercial(view_func):
             pass
         
         messages.error(request, 'Acceso solo para comerciales.')
-        return redirect('acceso_denegado')
+        return redirect('/acceso_denegado/')
     return wrapper
 
 
 def requiere_admin(view_func):
     """Decorador simplificado para requerir rol de admin"""
     @wraps(view_func)
-    @login_required(login_url='login')
+    @login_required(login_url='/login/')
     def wrapper(request, *args, **kwargs):
         try:
             perfil = request.user.perfil
@@ -84,20 +84,20 @@ def requiere_admin(view_func):
             pass
         
         messages.error(request, 'Acceso solo para administradores.')
-        return redirect('acceso_denegado')
+        return redirect('/acceso_denegado/')
     return wrapper
 
 
 def requiere_activo(view_func):
     """Decorador para verificar que el usuario está activo"""
     @wraps(view_func)
-    @login_required(login_url='login')
+    @login_required(login_url='/login/')
     def wrapper(request, *args, **kwargs):
         try:
             perfil = request.user.perfil
             if not perfil.activo:
                 messages.error(request, 'Tu cuenta ha sido desactivada.')
-                return redirect('login')
+                return redirect('/login/')
         except AttributeError:
             pass
         
