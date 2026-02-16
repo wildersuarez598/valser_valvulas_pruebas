@@ -49,7 +49,7 @@
                     <div class="card border-start border-info border-5">
                         <div class="card-body">
                             <h6 class="card-title text-muted">Tasa de Éxito</h6>
-                            <h2 class="text-info">{% if total > 0 %}{{ extraidos|add:0|mul:100|div:total|floatformat:0 }}%{% else %}0%{% endif %}</h2>
+                            <h2 class="text-info">{{ tasa_exito }}%</h2>
                         </div>
                     </div>
                 </div>

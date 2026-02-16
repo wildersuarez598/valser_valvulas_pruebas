@@ -222,13 +222,19 @@ def certificado_list(request):
     extraidos = certificados.filter(extraido_exitosamente=True).count()
     errores = certificados.filter(extraido_exitosamente=False).count()
     
-    logger.info(f'certificado_list: total={total}, extraidos={extraidos}, errores={errores}')
+    # Calcular tasa de éxito
+    tasa_exito = 0
+    if total > 0:
+        tasa_exito = round((extraidos / total) * 100)
+    
+    logger.info(f'certificado_list: total={total}, extraidos={extraidos}, errores={errores}, tasa={tasa_exito}%')
     
     context = {
         'certificados': certificados,
         'total': total,
         'extraidos': extraidos,
         'errores': errores,
+        'tasa_exito': tasa_exito,
         'titulo': 'Documentos Subidos',
         'descripcion': 'Lista de certificados, informes y otros documentos'
     }
