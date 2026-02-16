@@ -14,9 +14,47 @@
                     <p class="lead text-muted">{{ descripcion }}</p>
                 </div>
                 <a href="{% url 'servicios:upload_certificado' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-plus-circle"></i> Subir Nuevo Certificado
+                    <i class="fas fa-plus-circle"></i> Subir Nuevo Certificado
                 </a>
             </div>
+
+            <!-- Estadísticas -->
+            {% if total > 0 %}
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-start border-primary border-5">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Subidos</h6>
+                            <h2 class="text-primary">{{ total }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-start border-success border-5">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Extraídos Correctamente</h6>
+                            <h2 class="text-success">{{ extraidos }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-start border-warning border-5">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Con Errores</h6>
+                            <h2 class="text-warning">{{ errores }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-start border-info border-5">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Tasa de Éxito</h6>
+                            <h2 class="text-info">{% if total > 0 %}{{ extraidos|add:0|mul:100|div:total|floatformat:0 }}%{% else %}0%{% endif %}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Mensajes -->
             {% if messages %}
@@ -34,57 +72,91 @@
                     <table class="table table-hover">
                         <thead style="background-color: #1e40af; color: white;">
                             <tr>
-                                <th>Número de Certificado</th>
+                                <th>Número</th>
                                 <th>Tipo</th>
-                                <th>Fecha de Emisión</th>
-                                <th>Resultado</th>
+                                <th>Fecha Emisión</th>
+                                <th>Válvula/Serie</th>
                                 <th>Laboratorio</th>
-                                <th>Extraído</th>
+                                <th>Estado</th>
+                                <th>Vigencia</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for certificado in certificados %}
+                            {% for documento in certificados %}
                                 <tr>
                                     <td>
-                                        <strong>{{ certificado.numero_certificado }}</strong>
+                                        <strong>{{ documento.numero_documento|default:"(Sin #)" }}</strong>
                                     </td>
                                     <td>
                                         <span class="badge" style="background-color: #1e40af;">
-                                            {{ certificado.get_tipo_certificado_display }}
+                                            {% if documento.tipo_documento == 'calibracion' %}
+                                                <i class="fas fa-gauge"></i> Calibración
+                                            {% elif documento.tipo_documento == 'mantenimiento' %}
+                                                <i class="fas fa-wrench"></i> Mantenimiento
+                                            {% else %}
+                                                {{ documento.get_tipo_documento_display }}
+                                            {% endif %}
                                         </span>
                                     </td>
-                                    <td>{{ certificado.fecha_emision|date:"d/m/Y" }}</td>
                                     <td>
-                                        {% if certificado.resultado == "APROBADO" or certificado.resultado == "PASSED" %}
-                                            <span class="badge bg-success">{{ certificado.resultado }}</span>
-                                        {% elif certificado.resultado == "RECHAZADO" or certificado.resultado == "FAILED" %}
-                                            <span class="badge bg-danger">{{ certificado.resultado }}</span>
+                                        {% if documento.fecha_documento %}
+                                            {{ documento.fecha_documento|date:"d/m/Y" }}
                                         {% else %}
-                                            <span class="badge bg-warning">{{ certificado.resultado }}</span>
+                                            <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ certificado.laboratorio }}</td>
                                     <td>
-                                        {% if certificado.extraido_exitosamente %}
+                                        {% if documento.valvula %}
+                                            <a href="{% url 'valvulas:hoja_vida' documento.valvula.pk %}" class="text-decoration-none">
+                                                {{ documento.valvula.numero_serie }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ documento.laboratorio|default:"-" }}</td>
+                                    <td>
+                                        {% if documento.extraido_exitosamente %}
                                             <span class="badge bg-success">
-                                                <i class="bi bi-check-circle"></i> Sí
+                                                <i class="fas fa-check-circle"></i> Procesado
                                             </span>
                                         {% else %}
                                             <span class="badge bg-warning">
-                                                <i class="bi bi-exclamation-circle"></i> No
+                                                <i class="fas fa-exclamation-circle"></i> Pendiente
                                             </span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{% url 'certificado_detail' certificado.pk %}" class="btn btn-sm btn-info">
-                                                <i class="bi bi-eye"></i> Ver
+                                        {% if documento.fecha_vencimiento %}
+                                            {% if documento.esta_vigente %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-calendar-check"></i> Vigente
+                                                    <br><small>({{ documento.dias_para_vencer }} días)</small>
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-calendar-times"></i> Vencido
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'servicios:certificado_detail' documento.pk %}" class="btn btn-info" title="Ver detalles">
+                                                <i class="fas fa-eye"></i> Ver
                                             </a>
-                                            <form method="POST" action="{% url 'eliminar_certificado' certificado.pk %}" style="display: inline;">
+                                            {% if documento.archivo_pdf %}
+                                            <a href="{{ documento.archivo_pdf.url }}" class="btn btn-success" download title="Descargar PDF">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% endif %}
+                                            <form method="POST" action="{% url 'servicios:eliminar_certificado' documento.pk %}" style="display: inline-block;">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este certificado?');">
-                                                    <i class="bi bi-trash"></i> Eliminar
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este documento?');" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -96,8 +168,14 @@
                 </div>
             {% else %}
                 <div class="alert alert-info" role="alert">
-                    <h4 class="alert-heading">No hay certificados</h4>
-                    <p>Aún no has subido ningún certificado. <a href="{% url 'servicios:upload_certificado' %}">Sube tu primer certificado aquí</a>.</p>
+                    <h4 class="alert-heading"><i class="fas fa-info-circle"></i> No hay certificados</h4>
+                    <p>Aún no has subido ningún certificado. <a href="{% url 'servicios:upload_certificado' %}" class="alert-link">Sube tu primer certificado aquí</a>.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
                 </div>
             {% endif %}
         </div>

@@ -199,12 +199,20 @@ def certificado_list(request):
     Lista de documentos subidos
     """
     if hasattr(request.user, 'perfil') and request.user.perfil.rol == 'comercial':
-        documentos = Documento.objects.filter(usuario_comercial=request.user)
+        certificados = Documento.objects.filter(usuario_comercial=request.user).order_by('-fecha_creacion')
     else:
-        documentos = Documento.objects.all()
+        certificados = Documento.objects.all().order_by('-fecha_creacion')
+    
+    # Estadísticas
+    total = certificados.count()
+    extraidos = certificados.filter(extraido_exitosamente=True).count()
+    errores = certificados.filter(extraido_exitosamente=False).count()
     
     context = {
-        'documentos': documentos,
+        'certificados': certificados,
+        'total': total,
+        'extraidos': extraidos,
+        'errores': errores,
         'titulo': 'Documentos Subidos',
         'descripcion': 'Lista de certificados, informes y otros documentos'
     }
