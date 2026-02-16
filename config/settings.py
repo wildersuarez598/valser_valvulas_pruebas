@@ -232,6 +232,11 @@ LOGGING = {
             'level': environ.get('LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
+        'servicios': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
     },
 }
 

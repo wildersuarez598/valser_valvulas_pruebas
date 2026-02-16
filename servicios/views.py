@@ -88,7 +88,10 @@ def upload_certificado(request):
         try:
             # Detectar tipo de documento y extraer datos
             doc_type, extractor = detect_document_type(pdf_file)
+            logger.info(f'Tipo detectado: {doc_type}')
+            
             extracted_data = extractor.extract()
+            logger.info(f'Datos extraídos: numero_documento={extracted_data.get("numero_documento")}, numero_serie={extracted_data.get("numero_serie")}')
             
             # Crear documento con los datos extraídos
             documento = Documento(
@@ -107,23 +110,26 @@ def upload_certificado(request):
             if doc_type == 'calibracion':
                 documento.fecha_documento = _parse_date(extracted_data.get('fecha_emision')) or timezone.now().date()
                 documento.fecha_vencimiento = _parse_date(extracted_data.get('fecha_vencimiento'))
-                documento.presion_inicial = extracted_data.get('presion_inicial', '')
-                documento.presion_final = extracted_data.get('presion_final', '')
-                documento.temperatura = extracted_data.get('temperatura', '')
-                documento.resultado_calibracion = extracted_data.get('resultado', '')
-                documento.laboratorio = extracted_data.get('laboratorio', '')
-                documento.unidad_presion = extracted_data.get('unidad_presion', '')
+                documento.presion_inicial = extracted_data.get('presion_inicial') or None
+                documento.presion_final = extracted_data.get('presion_final') or None
+                documento.temperatura = extracted_data.get('temperatura') or None
+                documento.resultado_calibracion = extracted_data.get('resultado') or None
+                documento.laboratorio = extracted_data.get('laboratorio') or None
+                documento.unidad_presion = extracted_data.get('unidad_presion') or None
             
             elif doc_type == 'mantenimiento':
                 documento.fecha_documento = _parse_date(extracted_data.get('fecha_emision')) or timezone.now().date()
-                documento.tipo_mantenimiento = extracted_data.get('tipo_mantenimiento', '')
-                documento.descripcion_trabajos = extracted_data.get('descripcion_trabajos', '')
-                documento.estado_valvula = extracted_data.get('estado_valvula', '')
-                documento.materiales_utilizados = extracted_data.get('materiales_utilizados', '')
+                documento.tipo_mantenimiento = extracted_data.get('tipo_mantenimiento') or None
+                documento.descripcion_trabajos = extracted_data.get('descripcion_trabajos') or None
+                documento.estado_valvula = extracted_data.get('estado_valvula') or None
+                documento.materiales_utilizados = extracted_data.get('materiales_utilizados') or None
                 documento.proximo_mantenimiento = _parse_date(extracted_data.get('proximo_mantenimiento'))
-                documento.duracion_horas = extracted_data.get('duracion_horas', '')
+                documento.duracion_horas = extracted_data.get('duracion_horas') or None
             
+            # Guardar el documento inicial
             documento.save()
+            documento_id = documento.id
+            logger.info(f'Documento guardado exitosamente: ID={documento_id}, Tipo={doc_type}')
             
             # Auto-identificar válvula por número de serie y actualizar hoja de vida
             numero_serie = extracted_data.get('numero_serie') or extracted_data.get('serial_number')
@@ -131,16 +137,18 @@ def upload_certificado(request):
                 try:
                     valvula, fue_creada = documento.enlazar_valvula_por_numero_serie(numero_serie)
                     documento.save()  # Guardar la relación valvula
+                    logger.info(f'Válvula enlazada: {numero_serie}, Creada={fue_creada}')
                     
                     # Actualizar fechas en la hoja de vida de la válvula
                     documento.actualizar_fechas_hoja_vida()
+                    logger.info(f'Hoja de vida actualizada para válvula {numero_serie}')
                     
                     if fue_creada:
                         logger.info(f'Nueva válvula creada automáticamente: S/N {numero_serie}')
                     else:
                         logger.info(f'Válvula identificada: {valvula.marca} {valvula.modelo} (S/N {numero_serie})')
                 except Exception as e:
-                    logger.warning(f'Error al enlazar válvula: {str(e)}')
+                    logger.warning(f'Error al enlazar válvula: {str(e)}', exc_info=True)
                     # No interrumpir el flujo si hay error en auto-identificación
             
             tipo_display = documento.get_tipo_documento_display()
