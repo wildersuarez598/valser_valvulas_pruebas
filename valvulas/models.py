@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from clientes.models import Empresa
 
 
@@ -57,10 +58,6 @@ class Valvula(models.Model):
         """Indica si la válvula requiere calibración"""
         if self.fecha_ultima_calibracion is None:
             return True
-        # Aquí puedes agregar lógica para determinar si requiere calibración
-        # Por ejemplo, si pasaron más de 12 meses
-        from datetime import timedelta
-        from django.utils import timezone
         dias_desde_calibracion = (timezone.now().date() - self.fecha_ultima_calibracion).days
         return dias_desde_calibracion > 365
     
@@ -69,8 +66,6 @@ class Valvula(models.Model):
         """Indica si la válvula requiere mantenimiento"""
         if self.fecha_ultimo_servicio is None:
             return True
-        from datetime import timedelta
-        from django.utils import timezone
         dias_desde_servicio = (timezone.now().date() - self.fecha_ultimo_servicio).days
         return dias_desde_servicio > 180
 

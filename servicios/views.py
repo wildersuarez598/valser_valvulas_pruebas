@@ -2,17 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
-from django.views.generic import ListView, DetailView, DeleteView
-from django.utils.decorators import method_decorator
-from django.urls import reverse_lazy
 from datetime import datetime
 import pdfplumber
 import re
 
 from usuarios.decorators import requiere_comercial
-from servicios.models import Certificado, Servicio
-from servicios.forms import CertificadoForm, ServicioConCertificadoForm
+from servicios.models import Certificado
+from servicios.forms import CertificadoForm
 
 
 def extract_pdf_data(pdf_file):

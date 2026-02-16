@@ -114,7 +114,6 @@ def comercial_dashboard(request):
     
     # Obtener clientes del comercial
     clientes = PerfilUsuario.objects.filter(rol='cliente').values_list('empresa', flat=True).distinct()
-    empresas = User.objects.filter(perfil__empresa__isnull=False).values('perfil__empresa').distinct()
     
     # Obtener certificados del comercial
     certificados = Certificado.objects.filter(usuario_comercial=request.user).order_by('-fecha_emision')[:5]
