@@ -75,7 +75,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <a href="{% url 'upload_certificado' %}" class="btn btn-primary btn-block w-100 p-4" style="display: block; text-decoration: none; color: white;">
+                        <a href="{% url 'servicios:upload_certificado' %}" class="btn btn-primary btn-block w-100 p-4" style="display: block; text-decoration: none; color: white;">
                             <i class="fas fa-upload fa-2x mb-2" style="display: block;"></i>
                             Subir Certificado
                             <small class="d-block text-muted mt-1">(Disponible)</small>
@@ -109,7 +109,7 @@
                 <h5 class="mb-0">
                     <i class="fas fa-file-pdf"></i> Certificados Recientes
                 </h5>
-                <a href="{% url 'certificado_list' %}" class="btn btn-sm btn-light">Ver todos</a>
+                <a href="{% url 'servicios:certificado_list' %}" class="btn btn-sm btn-light">Ver todos</a>
             </div>
             <div class="card-body">
                 {% if certificados %}
@@ -151,7 +151,7 @@
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i> 
                         No hay certificados registrados aún. 
-                        <strong><a href="{% url 'upload_certificado' %}">Sube tu primer certificado aquí</a></strong>
+                        <strong><a href="{% url 'servicios:upload_certificado' %}">Sube tu primer certificado aquí</a></strong>
                     </div>
                 {% endif %}
             </div>

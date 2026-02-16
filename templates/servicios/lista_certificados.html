@@ -13,7 +13,7 @@
                     <h1 class="display-5">{{ titulo }}</h1>
                     <p class="lead text-muted">{{ descripcion }}</p>
                 </div>
-                <a href="{% url 'upload_certificado' %}" class="btn btn-primary btn-lg">
+                <a href="{% url 'servicios:upload_certificado' %}" class="btn btn-primary btn-lg">
                     <i class="bi bi-plus-circle"></i> Subir Nuevo Certificado
                 </a>
             </div>
@@ -97,7 +97,7 @@
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <h4 class="alert-heading">No hay certificados</h4>
-                    <p>Aún no has subido ningún certificado. <a href="{% url 'upload_certificado' %}">Sube tu primer certificado aquí</a>.</p>
+                    <p>Aún no has subido ningún certificado. <a href="{% url 'servicios:upload_certificado' %}">Sube tu primer certificado aquí</a>.</p>
                 </div>
             {% endif %}
         </div>
