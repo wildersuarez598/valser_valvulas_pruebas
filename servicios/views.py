@@ -194,19 +194,35 @@ def upload_certificado(request):
 
 
 @login_required
+@login_required(login_url='usuarios:login')
 def certificado_list(request):
     """
     Lista de documentos subidos
+    Visible para todos los usuarios autenticados, pero muestra solo su contenido si es comercial
     """
-    if hasattr(request.user, 'perfil') and request.user.perfil.rol == 'comercial':
-        certificados = Documento.objects.filter(usuario_comercial=request.user).order_by('-fecha_creacion')
+    # DEBUG: Log de acceso
+    logger.info(f'certificado_list: usuario={request.user.username}, is_staff={request.user.is_staff}, is_superuser={request.user.is_superuser}')
+    
+    if hasattr(request.user, 'perfil'):
+        rol = request.user.perfil.rol
+        logger.info(f'certificado_list: rol={rol}')
+        
+        if rol == 'comercial':
+            # Comerciales solo ven sus propios documentos
+            certificados = Documento.objects.filter(usuario_comercial=request.user).order_by('-fecha_creacion')
+        else:
+            # Clientes y admins ven todos
+            certificados = Documento.objects.all().order_by('-fecha_creacion')
     else:
+        # Sin perfil = admin/staff
         certificados = Documento.objects.all().order_by('-fecha_creacion')
     
     # Estadísticas
     total = certificados.count()
     extraidos = certificados.filter(extraido_exitosamente=True).count()
     errores = certificados.filter(extraido_exitosamente=False).count()
+    
+    logger.info(f'certificado_list: total={total}, extraidos={extraidos}, errores={errores}')
     
     context = {
         'certificados': certificados,
