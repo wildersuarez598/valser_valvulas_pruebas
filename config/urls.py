@@ -23,14 +23,12 @@ from usuarios.views import login_view
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),    
-    # Autenticación y users
-    path('auth/', include('usuarios.urls')),
+    # Autenticación y users (sin prefijo para que login/ y dashboard/ sean accesibles desde raíz)
+    path('', include('usuarios.urls')),
     # Servicios y certificados
     path('servicios/', include('servicios.urls')),
     # Hoja de vida de válvulas
     path('valvulas/', include('valvulas.urls')),
-    # Redirección por defecto al login
-    path('', login_view, name='home'),
 ]
 
 # Servir archivos de media en desarrollo

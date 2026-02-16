@@ -160,9 +160,9 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Login configuration
-LOGIN_URL = 'usuarios:login'
-LOGIN_REDIRECT_URL = 'usuarios:dashboard'
-LOGOUT_REDIRECT_URL = 'usuarios:login'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 # CSRF y CORS Configuration
 _csrf_origins = environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000')
