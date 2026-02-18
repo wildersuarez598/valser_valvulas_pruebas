@@ -7,6 +7,8 @@ urlpatterns = [
     # Nota: la ruta "certificados/" sigue existiendo para compatibilidad
     # pero ahora muestra un listado de válvulas (hoja de vida) en lugar de
     # los documentos individuales.
+    # main listing now shows válvulas, pero mantenemos ambas rutas por compatibilidad
+    path('valvulas/', views.certificado_list, name='valvulas_list'),
     path('certificados/', views.certificado_list, name='certificado_list'),
     path('certificados/<int:pk>/', views.certificado_detail, name='certificado_detail'),
     path('certificados/subir/', views.upload_certificado, name='upload_certificado'),
