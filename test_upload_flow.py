@@ -47,6 +47,8 @@ BT
 0 -20 Td
 (Serie: SN-12345-A) Tj
 0 -20 Td
+(Modelo: MOD-XYZ) Tj
+0 -20 Td
 (Presion inicial: 100 PSI) Tj
 0 -20 Td
 (Presion final: 105 PSI) Tj
@@ -156,6 +158,16 @@ def test_upload_flow():
         print(f"    - tipo: {doc_verificado.get_tipo_documento_display()}")
         print(f"    - archivo: {doc_verificado.archivo_pdf.name}")
         print(f"    - archivo.size: {doc_verificado.archivo_pdf.size}")
+        # 6.b linkear la válvula (simulando vista)
+        numero_serie = extracted_data.get('numero_serie')
+        modelo = extracted_data.get('modelo')
+        print(f"    - serie extraída: {numero_serie}, modelo extraído: {modelo}")
+        if numero_serie or modelo:
+            val, creada = doc_verificado.enlazar_valvula_por_numero_serie(numero_serie, modelo=modelo)
+            print(f"    - Válvula enlazada: {val}, creada={creada}")
+            assert val is not None
+            assert val.modelo == (modelo or val.modelo)
+            print(f"    - Válvula en BD: S/N {val.numero_serie}, modelo {val.modelo}")
         
         # Verificar que el archivo existe en el sistema de archivos
         if doc_verificado.archivo_pdf:

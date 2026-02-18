@@ -91,7 +91,10 @@ def upload_certificado(request):
             logger.info(f'Tipo detectado: {doc_type}')
             
             extracted_data = extractor.extract()
-            logger.info(f'Datos extraídos: numero_documento={extracted_data.get("numero_documento")}, numero_serie={extracted_data.get("numero_serie")}')
+            logger.info(
+                f"Datos extraídos: numero_documento={extracted_data.get('numero_documento')}, "
+                f"serie={extracted_data.get('numero_serie')}, modelo={extracted_data.get('modelo')}"
+            )
             
             # Crear documento con los datos extraídos
             documento = Documento(
@@ -105,6 +108,10 @@ def upload_certificado(request):
                 extraido_exitosamente=True,
                 fecha_extraccion_datos=timezone.now(),
             )
+            # guardar valores transitorios para creación de válvula
+            documento._modelo_extraido = extracted_data.get('modelo', '')
+            documento._marca_extraida = extracted_data.get('marca', '')
+            documento._tamaño_extraido = extracted_data.get('tamaño', '')
             
             # Llenar campos según tipo de documento
             if doc_type == 'calibracion':
@@ -131,22 +138,31 @@ def upload_certificado(request):
             documento_id = documento.id
             logger.info(f'Documento guardado exitosamente: ID={documento_id}, Tipo={doc_type}')
             
-            # Auto-identificar válvula por número de serie y actualizar hoja de vida
+            # Auto-identificar válvula por número de serie o modelo y actualizar hoja de vida
             numero_serie = extracted_data.get('numero_serie') or extracted_data.get('serial_number')
-            if numero_serie:
+            modelo = extracted_data.get('modelo')
+            if numero_serie or modelo:
                 try:
-                    valvula, fue_creada = documento.enlazar_valvula_por_numero_serie(numero_serie)
+                    valvula, fue_creada = documento.enlazar_valvula_por_numero_serie(
+                        numero_serie=numero_serie,
+                        modelo=modelo
+                    )
                     documento.save()  # Guardar la relación valvula
-                    logger.info(f'Válvula enlazada: {numero_serie}, Creada={fue_creada}')
-                    
+
+                    ident = numero_serie or modelo
+                    logger.info(f'Válvula enlazada usando "{ident}": Creada={fue_creada}')
+
                     # Actualizar fechas en la hoja de vida de la válvula
                     documento.actualizar_fechas_hoja_vida()
-                    logger.info(f'Hoja de vida actualizada para válvula {numero_serie}')
-                    
+                    logger.info(f'Hoja de vida actualizada para válvula {ident}')
+
                     if fue_creada:
-                        logger.info(f'Nueva válvula creada automáticamente: S/N {numero_serie}')
+                        logger.info(f'Nueva válvula creada automáticamente: {ident}')
                     else:
-                        logger.info(f'Válvula identificada: {valvula.marca} {valvula.modelo} (S/N {numero_serie})')
+                        logger.info(
+                            f'Válvula identificada: {valvula.marca} {valvula.modelo} ' \
+                            f'(S/N {valvula.numero_serie})'
+                        )
                 except Exception as e:
                     logger.warning(f'Error al enlazar válvula: {str(e)}', exc_info=True)
                     # No interrumpir el flujo si hay error en auto-identificación

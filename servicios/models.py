@@ -126,40 +126,66 @@ class Documento(models.Model):
         delta = self.fecha_vencimiento - timezone.now().date()
         return delta.days
     
-    def enlazar_valvula_por_numero_serie(self, numero_serie):
+    def enlazar_valvula_por_numero_serie(self, numero_serie=None, modelo=None):
         """
-        Busca y enlaza la válvula más una válvula basada en número de serie
-        Si no existe, la crea con datos básicos
-        Retorna: (valvula, creada)
+        Identifica la válvula correspondiente al documento usando el número de serie
+        o, en caso de que este falte, el modelo.
+
+        Se intenta primero encontrar un registro con el número de serie proporcionado.
+        Si no se encuentra (o no se pasó), se consulta por modelo (tomando la primera
+        válvula que coincida). Cualquier búsqueda ignora mayúsculas/minúsculas.
+
+        Si no existe ninguna válvula que coincida, se crea una nueva usando la
+        información disponible (serie o modelo se transforma en número de serie
+        si sólo se conoce el modelo).
+
+        Args:
+            numero_serie (str|None): número de serie extraído del documento
+            modelo (str|None): modelo extraído del documento
+
+        Returns:
+            tuple(valvula, creada:bool)
         """
-        if not numero_serie:
+        # ninguno de los identificadores válidos
+        if not numero_serie and not modelo:
             return None, False
-        
-        # Buscar válvula existente
-        try:
-            valvula = Valvula.objects.get(numero_serie=numero_serie)
-            self.valvula = valvula
-            return valvula, False
-        except Valvula.DoesNotExist:
-            # Obtener empresa del servicio o usuario comercial
-            empresa = None
-            if self.servicio and self.servicio.valvula:
-                empresa = self.servicio.valvula.empresa
-            elif self.usuario_comercial and hasattr(self.usuario_comercial, 'perfil'):
-                empresa = self.usuario_comercial.perfil.empresa
-            
-            # Crear nueva válvula si no existe
-            valvula = Valvula(
-                numero_serie=numero_serie,
-                marca=getattr(self, '_marca_extraida', ''),
-                modelo=getattr(self, '_modelo_extraido', ''),
-                tamaño=getattr(self, '_tamaño_extraido', ''),
-                empresa=empresa,
-                tipo='alivio' if self.tipo_documento == 'calibracion' else 'control',
-            )
-            valvula.save()
-            self.valvula = valvula
-            return valvula, True
+
+        # Helper para recuperar empresa de contexto
+        empresa = None
+        if self.servicio and self.servicio.valvula:
+            empresa = self.servicio.valvula.empresa
+        elif self.usuario_comercial and hasattr(self.usuario_comercial, 'perfil'):
+            empresa = self.usuario_comercial.perfil.empresa
+
+        # 1. intentar por número de serie si se proporciona
+        if numero_serie:
+            try:
+                valvula = Valvula.objects.get(numero_serie=numero_serie)
+                self.valvula = valvula
+                return valvula, False
+            except Valvula.DoesNotExist:
+                pass  # continuamos a intentar por modelo
+
+        # 2. intentar por modelo si se proporcionó y no encontramos por serie
+        if modelo:
+            valvula = Valvula.objects.filter(modelo__iexact=modelo).first()
+            if valvula:
+                self.valvula = valvula
+                return valvula, False
+
+        # 3. no existe, crear nueva válvula
+        identificador = numero_serie or modelo or ''
+        valvula = Valvula(
+            numero_serie=identificador,
+            marca=getattr(self, '_marca_extraida', ''),
+            modelo=modelo or getattr(self, '_modelo_extraido', ''),
+            tamaño=getattr(self, '_tamaño_extraido', ''),
+            empresa=empresa,
+            tipo='alivio' if self.tipo_documento == 'calibracion' else 'control',
+        )
+        valvula.save()
+        self.valvula = valvula
+        return valvula, True
     
     def actualizar_fechas_hoja_vida(self):
         """

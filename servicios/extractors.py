@@ -78,6 +78,17 @@ class CertificadoCalibracionExtractor(PDFExtractor):
                 r'(?:Serie)[\s:]*([A-Z0-9\-]+)',
                 r'(?:Válvula)[\s:]*([A-Z0-9\-]+)'
             ),
+            'modelo': self.find_pattern(
+                r'(?:Modelo|Model)[\s:]*([A-Z0-9\-\/]+)',
+                r'(?:M\/N|M\.N\.)[\s:]*([A-Z0-9\-\/]+)',
+                r'(?:Type)[\s:]*([A-Z0-9\-\/]+)'
+            ),
+            'marca': self.find_pattern(
+                r'(?:Marca|Brand)[\s:]*([A-Za-z0-9\s\-]+)'
+            ),
+            'tamaño': self.find_pattern(
+                r'(?:Tamaño|Size)[\s:]*([A-Za-z0-9\s\-]+)'
+            ),
             'fecha_emision': self.find_pattern(
                 r'(?:Fecha|Emisión|Date|Emitted|FECHA)[\s:]*(\d{1,2}[\s\-\/\.]\d{1,2}[\s\-\/\.]\d{4})',
                 r'(\d{4})[\s\-\/](\d{1,2})[\s\-\/](\d{1,2})',
@@ -171,6 +182,17 @@ class InformeMantenimientoExtractor(PDFExtractor):
                 r'(?:Número[\s]de[\s]Serie|Serial[\s]Number|S/N|SN)[\s:]*([A-Z0-9\-]+)',
                 r'(?:Serie)[\s:]*([A-Z0-9\-]+)',
                 r'(?:Válvula)[\s:]*([A-Z0-9\-]+)'
+            ),
+            'modelo': self.find_pattern(
+                r'(?:Modelo|Model)[\s:]*([A-Z0-9\-\/]+)',
+                r'(?:M\/N|M\.N\.)[\s:]*([A-Z0-9\-\/]+)',
+                r'(?:Type)[\s:]*([A-Z0-9\-\/]+)'
+            ),
+            'marca': self.find_pattern(
+                r'(?:Marca|Brand)[\s:]*([A-Za-z0-9\s\-]+)'
+            ),
+            'tamaño': self.find_pattern(
+                r'(?:Tamaño|Size)[\s:]*([A-Za-z0-9\s\-]+)'
             ),
             'fecha_mantenimiento': self.find_pattern(
                 r'(?:Fecha|Mantenimiento|Date|Service[\s]Date)[\s:]*(\d{1,2}[\s\-\/]\d{1,2}[\s\-\/]\d{4})',
