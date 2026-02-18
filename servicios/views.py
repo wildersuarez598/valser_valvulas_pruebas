@@ -271,6 +271,7 @@ def certificado_detail(request, pk):
     
     context = {
         'documento': documento,
+        'certificado': documento,  # alias for template compatibility
         'titulo': f'{documento.get_tipo_documento_display()} {documento.numero_documento}',
     }
     return render(request, 'servicios/detalle_certificado.html', context)
