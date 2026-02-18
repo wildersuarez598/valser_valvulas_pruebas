@@ -192,10 +192,10 @@
 
             <!-- Acciones -->
             <div class="d-flex gap-2 mt-4">
-                <a href="{% url 'certificado_list' %}" class="btn btn-secondary btn-lg">
+                <a href="{% url 'servicios:certificado_list' %}" class="btn btn-secondary btn-lg">
                     <i class="bi bi-arrow-left"></i> Volver
                 </a>
-                <form method="POST" action="{% url 'eliminar_certificado' certificado.pk %}" style="display: inline;">
+                <form method="POST" action="{% url 'servicios:eliminar_certificado' certificado.pk %}" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('¿Estás seguro que deseas eliminar este certificado?');">
                         <i class="bi bi-trash"></i> Eliminar Certificado
