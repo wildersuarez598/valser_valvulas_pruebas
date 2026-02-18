@@ -100,8 +100,8 @@ def cliente_dashboard(request):
 
 @login_required(login_url='usuarios:login')
 def comercial_dashboard(request):
-    """Dashboard para comerciales"""
-    from servicios.models import Certificado
+    """Dashboard para comerciales - muestra las válvulas más recientes de sus clientes"""
+    from valvulas.models import Valvula
     
     try:
         perfil = request.user.perfil
@@ -112,16 +112,15 @@ def comercial_dashboard(request):
         messages.error(request, 'Acceso denegado.')
         return redirect('usuarios:dashboard')
     
-    # Obtener clientes del comercial
-    clientes = PerfilUsuario.objects.filter(rol='cliente').values_list('empresa', flat=True).distinct()
-    
-    # Obtener certificados del comercial
-    certificados = Certificado.objects.filter(usuario_comercial=request.user).order_by('-fecha_emision')[:5]
+    # Obtener empresas asociadas a los clientes del comercial
+    empresas = PerfilUsuario.objects.filter(rol='cliente').values_list('empresa', flat=True).distinct()
+    # tomar las últimas 5 válvulas creadas/pertenecientes a esas empresas
+    valvulas = Valvula.objects.filter(empresa__in=empresas).order_by('-fecha_creacion')[:5]
     
     context = {
         'usuario': request.user,
-        'total_clientes': len(clientes),
-        'certificados': certificados,
+        'total_clientes': len(empresas),
+        'valvulas': valvulas,
     }
     
     return render(request, 'comercial/dashboard.html', context)

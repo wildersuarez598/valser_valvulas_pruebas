@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mis Certificados - Valser{% endblock %}
+{% block title %}Mis Válvulas - Valser{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-5">
@@ -14,7 +14,7 @@
                     <p class="lead text-muted">{{ descripcion }}</p>
                 </div>
                 <a href="{% url 'servicios:upload_certificado' %}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-plus-circle"></i> Subir Nuevo Certificado
+                    <i class="fas fa-plus-circle"></i> Subir Nuevo Documento
                 </a>
             </div>
 
@@ -67,95 +67,57 @@
             {% endif %}
 
             <!-- Contenido -->
-            {% if certificados %}
+            {% if valvulas %}
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead style="background-color: #1e40af; color: white;">
                             <tr>
-                                <th>Número</th>
-                                <th>Tipo</th>
-                                <th>Fecha Emisión</th>
-                                <th>Válvula/Serie</th>
-                                <th>Laboratorio</th>
-                                <th>Estado</th>
-                                <th>Vigencia</th>
+                                <th>Modelo/Serie</th>
+                                <th>Orden de Compra</th>
+                                <th>Fecha Mantenimiento</th>
+                                <th>Fecha Calibración</th>
+                                <th>Cliente</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for documento in certificados %}
+                            {% for valvula in valvulas %}
                                 <tr>
                                     <td>
-                                        <strong>{{ documento.numero_documento|default:"(Sin #)" }}</strong>
+                                        {# mostrar serie si existe, de lo contrario modelo #}
+                                        <a href="{% url 'valvulas:hoja_vida' valvula.pk %}" class="text-decoration-none">
+                                            {{ valvula.numero_serie|default:valvula.modelo }}
+                                        </a>
                                     </td>
                                     <td>
-                                        <span class="badge" style="background-color: #1e40af;">
-                                            {% if documento.tipo_documento == 'calibracion' %}
-                                                <i class="fas fa-gauge"></i> Calibración
-                                            {% elif documento.tipo_documento == 'mantenimiento' %}
-                                                <i class="fas fa-wrench"></i> Mantenimiento
-                                            {% else %}
-                                                {{ documento.get_tipo_documento_display }}
-                                            {% endif %}
-                                        </span>
+                                        {# tomar numero de documento del último mantenimiento como OC #}
+                                        {% with mant=valvula.obtener_ultimo_mantenimiento %}
+                                            {% if mant %}{{ mant.numero_documento|default:"-" }}{% else %}-{% endif %}
+                                        {% endwith %}
                                     </td>
                                     <td>
-                                        {% if documento.fecha_documento %}
-                                            {{ documento.fecha_documento|date:"d/m/Y" }}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
+                                        {% with mant=valvula.obtener_ultimo_mantenimiento %}
+                                            {% if mant and mant.fecha_documento %}
+                                                {{ mant.fecha_documento|date:"d/m/Y" }}
+                                            {% else %}-{% endif %}
+                                        {% endwith %}
                                     </td>
                                     <td>
-                                        {% if documento.valvula %}
-                                            <a href="{% url 'valvulas:hoja_vida' documento.valvula.pk %}" class="text-decoration-none">
-                                                {{ documento.valvula.numero_serie }}
-                                            </a>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
+                                        {% with cal=valvula.obtener_ultima_calibracion %}
+                                            {% if cal and cal.fecha_documento %}
+                                                {{ cal.fecha_documento|date:"d/m/Y" }}
+                                            {% else %}-{% endif %}
+                                        {% endwith %}
                                     </td>
-                                    <td>{{ documento.laboratorio|default:"-" }}</td>
-                                    <td>
-                                        {% if documento.extraido_exitosamente %}
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check-circle"></i> Procesado
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-warning">
-                                                <i class="fas fa-exclamation-circle"></i> Pendiente
-                                            </span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if documento.fecha_vencimiento %}
-                                            {% if documento.esta_vigente %}
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-calendar-check"></i> Vigente
-                                                    <br><small>({{ documento.dias_para_vencer }} días)</small>
-                                                </span>
-                                            {% else %}
-                                                <span class="badge bg-danger">
-                                                    <i class="fas fa-calendar-times"></i> Vencido
-                                                </span>
-                                            {% endif %}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
+                                    <td>{{ valvula.empresa.nombre }}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{% url 'servicios:certificado_detail' documento.pk %}" class="btn btn-info" title="Ver detalles">
+                                            <a href="{% url 'valvulas:hoja_vida' valvula.pk %}" class="btn btn-info" title="Ver hoja de vida">
                                                 <i class="fas fa-eye"></i> Ver
                                             </a>
-                                            {% if documento.archivo_pdf %}
-                                            <a href="{{ documento.archivo_pdf.url }}" class="btn btn-success" download title="Descargar PDF">
-                                                <i class="fas fa-download"></i>
-                                            </a>
-                                            {% endif %}
-                                            <form method="POST" action="{% url 'servicios:eliminar_certificado' documento.pk %}" style="display: inline-block;">
+                                            <form method="POST" action="{% url 'servicios:eliminar_valvula' valvula.pk %}" style="display: inline-block;">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este documento?');" title="Eliminar">
+                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta válvula?');" title="Eliminar">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -168,8 +130,8 @@
                 </div>
             {% else %}
                 <div class="alert alert-info" role="alert">
-                    <h4 class="alert-heading"><i class="fas fa-info-circle"></i> No hay certificados</h4>
-                    <p>Aún no has subido ningún certificado. <a href="{% url 'servicios:upload_certificado' %}" class="alert-link">Sube tu primer certificado aquí</a>.</p>
+                    <h4 class="alert-heading"><i class="fas fa-info-circle"></i> No hay válvulas registradas aún</h4>
+                    <p>El sistema aún no ha detectado ninguna válvula mediante los documentos subidos. <a href="{% url 'servicios:upload_certificado' %}" class="alert-link">Sube un certificado o informe para comenzar</a>.</p>
                 </div>
             {% endif %}
         </div>

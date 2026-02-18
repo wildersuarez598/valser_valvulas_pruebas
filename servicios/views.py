@@ -281,7 +281,8 @@ def certificado_detail(request, pk):
 @require_http_methods(["POST"])
 def eliminar_certificado(request, pk):
     """
-    Elimina un documento
+    Elimina un documento (mantenido sólo por compatibilidad con
+    viejos enlaces). No se utiliza en la nueva vista de válvulas.
     """
     documento = get_object_or_404(Documento, pk=pk)
     
@@ -294,5 +295,26 @@ def eliminar_certificado(request, pk):
     documento.delete()
     messages.success(request, f'Documento "{numero}" eliminado correctamente')
     
+    return redirect('servicios:certificado_list')
+
+@requiere_comercial
+@require_http_methods(["POST"])
+def eliminar_valvula(request, pk):
+    """
+    Borra una válvula y por ende su hoja de vida.
+    Esta acción se muestra en la lista de válvulas completa.
+    """
+    from valvulas.models import Valvula
+
+    valvula = get_object_or_404(Valvula, pk=pk)
+    # permisos: sólo el comercial de la misma empresa o admin
+    if hasattr(request.user, 'perfil') and request.user.perfil.rol != 'admin':
+        if valvula.empresa != request.user.perfil.empresa:
+            messages.error(request, 'No tienes permiso para eliminar esta válvula')
+            return redirect('servicios:certificado_list')
+
+    nombre = valvula.numero_serie or valvula.modelo
+    valvula.delete()
+    messages.success(request, f'Válvula "{nombre}" eliminada correctamente')
     return redirect('servicios:certificado_list')
 
